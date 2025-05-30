@@ -310,7 +310,7 @@ const DrawerContentWrapper = memo(function DrawerContentWrapper({
           {/* Content Area */}
           <div
             ref={contentRef}
-            className="px-5 sm:px-6 overflow-y-auto max-h-[calc(85vh-220px)] py-5 space-y-6"
+            className="px-5 sm:px-6 overflow-y-auto max-h-[calc(85vh-300px)] py-5 space-y-6"
           >
             {/* Error message */}
             {error && (
