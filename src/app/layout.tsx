@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     title: APP_NAME,
     description: APP_DESCRIPTION,
     images: [OG_IMAGE],
-    creator: "@KitaOfficial",
+    creator: "@kita",
   },
 
   // App icons
