@@ -8,31 +8,31 @@ import { useCallback, useEffect, useRef } from "react";
  */
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-export  function useDebounce<T extends (...args: any[]) => any>(
-  callback: T,
-  delay: number
+export function useDebounce<T extends (...args: any[]) => any>(
+	callback: T,
+	delay: number,
 ): (...args: Parameters<T>) => void {
-  const timeoutRef = useRef<number | null>(null);
+	const timeoutRef = useRef<number | null>(null);
 
-  useEffect(() => {
-    // Clean up any pending debounce on unmount
-    return () => {
-      if (timeoutRef.current) {
-        window.clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
+	useEffect(() => {
+		// Clean up any pending debounce on unmount
+		return () => {
+			if (timeoutRef.current) {
+				window.clearTimeout(timeoutRef.current);
+			}
+		};
+	}, []);
 
-  return useCallback(
-    (...args: Parameters<T>) => {
-      if (timeoutRef.current) {
-        window.clearTimeout(timeoutRef.current);
-      }
+	return useCallback(
+		(...args: Parameters<T>) => {
+			if (timeoutRef.current) {
+				window.clearTimeout(timeoutRef.current);
+			}
 
-      timeoutRef.current = window.setTimeout(() => {
-        callback(...args);
-      }, delay);
-    },
-    [callback, delay]
-  );
+			timeoutRef.current = window.setTimeout(() => {
+				callback(...args);
+			}, delay);
+		},
+		[callback, delay],
+	);
 }
