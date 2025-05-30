@@ -2,16 +2,12 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { AnimatePresence, motion } from "framer-motion";
 
-import ReportStatusBadge from "@/components/report-status-badge";
 // UI Components
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Sheet,
   SheetContent,
@@ -20,16 +16,22 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+// Custom Components
+import ReportStatusBadge from "@/components/report-status-badge";
+import { FilterPanel } from "@/components/map/filter-panel";
+import { SearchBar } from "@/components/map/search-bar";
+import { MapReportCard } from "@/components/map/report-card";
+
 // Icons
-import { ChevronLeft, Filter, Locate, MapPin, Search, X } from "lucide-react";
+import { ChevronLeft, Filter, Locate, Search, X } from "lucide-react";
 
-// Data
+// Data & Types
 import { categories, reports } from "@/lib/mock-data";
-
-// Types
 import type { LatLngTuple } from "leaflet";
-import { useMap } from "react-leaflet";
-import { Report } from "@/types/report";
+import type { Report } from "@/types/report";
+
+// Hooks
+import { useMapOperations } from "@/hooks/use-map-operations";
 
 // Dynamically import map components to avoid SSR issues
 const MapContainer = dynamic(
@@ -44,8 +46,12 @@ const Marker = dynamic(
   () => import("react-leaflet").then((mod) => mod.Marker),
   { ssr: false }
 );
+const ZoomControl = dynamic(
+  () => import("react-leaflet").then((mod) => mod.ZoomControl),
+  { ssr: false }
+);
 
-// Sample coordinates for reports
+// Sample coordinates for reports - in production this would come from the database
 const reportCoordinates: Record<string, LatLngTuple> = {
   "report-1": [-6.2, 106.816666],
   "report-2": [-6.205, 106.82],
@@ -55,113 +61,31 @@ const reportCoordinates: Record<string, LatLngTuple> = {
   "report-6": [-6.198, 106.805],
 };
 
-// Helper component to fly to selected report
-function MapController({
-  selectedReport,
-  userPosition,
-}: {
+interface MapControllerProps {
   selectedReport: string | null;
   userPosition: LatLngTuple;
-}) {
-  const map = useMap();
+}
+
+// Helper component to fly to selected report - extracted for clarity
+const MapController: FC<MapControllerProps> = ({
+  selectedReport,
+  userPosition,
+}) => {
+  const { flyToLocation } = useMapOperations();
 
   useEffect(() => {
     if (selectedReport && reportCoordinates[selectedReport]) {
-      map.flyTo(reportCoordinates[selectedReport], 16, {
-        animate: true,
-        duration: 1,
-      });
+      flyToLocation(reportCoordinates[selectedReport], 16);
     } else {
-      map.flyTo(userPosition, 13, { animate: true, duration: 1 });
+      flyToLocation(userPosition, 13);
     }
-  }, [selectedReport, userPosition, map]);
+  }, [selectedReport, userPosition, flyToLocation]);
 
   return null;
-}
-
-// Search bar component
-function SearchBar({
-  searchQuery,
-  setSearchQuery,
-  searchLocation,
-  isSearching,
-  setSearchVisible,
-}: {
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-  searchLocation: () => Promise<void>;
-  isSearching: boolean;
-  setSearchVisible: (visible: boolean) => void;
-}) {
-  return (
-    <div className="flex-1 mx-2 relative">
-      <Input
-        placeholder="Cari lokasi..."
-        className="pl-10 pr-10 bg-background/95 backdrop-blur-sm shadow-md rounded-full border-muted"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        onKeyDown={(e) => e.key === "Enter" && searchLocation()}
-        aria-label="Cari lokasi"
-      />
-      {isSearching ? (
-        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 animate-spin border-2 border-primary border-t-transparent rounded-full" />
-      ) : (
-        <Search
-          className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground cursor-pointer"
-          onClick={searchLocation}
-        />
-      )}
-      <Button
-        variant="ghost"
-        size="icon"
-        className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 rounded-full"
-        onClick={() => setSearchVisible(false)}
-        aria-label="Tutup pencarian"
-      >
-        <X className="h-4 w-4" />
-      </Button>
-    </div>
-  );
-}
-
-// Report card component
-function ReportCard({ report }: { report: Report }) {
-  return (
-    <Link href={`/report/${report.id}`}>
-      <Card className="w-full shadow-lg hover:shadow-xl transition-all duration-300 border-muted/80">
-        <CardContent className="p-4">
-          <div className="flex gap-4">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden flex-shrink-0 shadow-sm">
-              <img
-                src={report.imageUrls[0] || "/placeholder.svg"}
-                alt={report.title}
-                className="w-full h-full object-cover"
-                loading="lazy"
-              />
-            </div>
-            <div className="flex-1 min-w-0 space-y-1 sm:space-y-2">
-              <div className="flex justify-between items-start gap-2">
-                <h3 className="font-medium line-clamp-1 text-sm sm:text-base">
-                  {report.title}
-                </h3>
-                <ReportStatusBadge status={report.status} />
-              </div>
-              <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1">
-                {report.location}
-              </p>
-              <p className="text-xs sm:text-sm text-muted-foreground">
-                {report.date}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </Link>
-  );
-}
+};
 
 export default function MapView() {
-  // State management
+  // Core state
   const [selectedReport, setSelectedReport] = useState<string | null>(null);
   const [searchVisible, setSearchVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -170,8 +94,13 @@ export default function MapView() {
   const [userPosition, setUserPosition] = useState<LatLngTuple>([
     -6.2, 106.816666,
   ]);
+  const [activeFilters, setActiveFilters] = useState({
+    statuses: ["pending", "in_progress", "completed", "rejected"],
+    categories: categories.map((c) => c.id),
+    timePeriod: "all",
+  });
 
-  // Selected report data
+  // Get the selected report data
   const selectedReportData = useMemo(
     () =>
       selectedReport ? reports.find((r) => r.id === selectedReport) : null,
@@ -180,35 +109,54 @@ export default function MapView() {
 
   // Initialize Leaflet
   useEffect(() => {
-    try {
-      const L = require("leaflet");
-      delete L.Icon.Default.prototype._getIconUrl;
-      L.Icon.Default.mergeOptions({
-        iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
-        iconRetinaUrl:
-          "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
-        shadowUrl:
-          "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
-      });
-      setMapReady(true);
-    } catch (error) {
-      console.error("Failed to initialize Leaflet:", error);
-      toast.error("Gagal memuat peta");
-    }
+    const initLeaflet = async () => {
+      try {
+        const L = await import("leaflet");
+        // Fix default icon paths
+        delete L.Icon.Default.prototype._getIconUrl;
+        L.Icon.Default.mergeOptions({
+          iconUrl: "/images/map/marker-icon.png",
+          iconRetinaUrl: "/images/map/marker-icon-2x.png",
+          shadowUrl: "/images/map/marker-shadow.png",
+        });
+        setMapReady(true);
+      } catch (error) {
+        console.error("Failed to initialize Leaflet:", error);
+        toast.error("Gagal memuat peta. Coba muat ulang halaman.");
+      }
+    };
+
+    initLeaflet();
+
+    // Add CSS to customize markers by status
+    const style = document.createElement("style");
+    style.innerHTML = `
+      .marker-pending { filter: hue-rotate(200deg); }
+      .marker-in_progress { filter: hue-rotate(60deg); }
+      .marker-completed { filter: hue-rotate(120deg); }
+      .marker-rejected { filter: hue-rotate(280deg); }
+    `;
+    document.head.appendChild(style);
+
+    return () => {
+      document.head.removeChild(style);
+    };
   }, []);
 
   // Create marker icon (memoized)
   const createMarkerIcon = useCallback((status: string) => {
+    if (typeof window === "undefined") return null;
+
     try {
       const L = require("leaflet");
       return new L.Icon({
-        iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
-        iconRetinaUrl:
-          "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
-        shadowUrl:
-          "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+        iconUrl: "/images/map/marker-icon.png",
+        iconRetinaUrl: "/images/map/marker-icon-2x.png",
+        shadowUrl: "/images/map/marker-shadow.png",
         iconSize: [25, 41],
         iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41],
         className: `marker-${status}`,
       });
     } catch (error) {
@@ -236,15 +184,15 @@ export default function MapView() {
       const data = await response.json();
 
       if (data && data.length > 0) {
-        const { lat, lon } = data[0];
+        const { lat, lon, display_name } = data[0];
         setUserPosition([Number.parseFloat(lat), Number.parseFloat(lon)]);
-        setSelectedReport(null); // Clear selected report when searching
-        toast.success("Lokasi ditemukan!");
+        setSelectedReport(null);
+        toast.success(`Lokasi ditemukan: ${display_name.split(",")[0]}`);
       } else {
         toast.warning("Lokasi tidak ditemukan, coba kata kunci lain");
       }
     } catch (error) {
-      console.error("Gagal mencari lokasi:", error);
+      console.error("Failed to search location:", error);
       toast.error("Gagal mencari lokasi, coba lagi nanti");
     } finally {
       setIsSearching(false);
@@ -258,25 +206,46 @@ export default function MapView() {
       return;
     }
 
-    toast.info("Mencari lokasi Anda...");
+    toast.loading("Mencari lokasi Anda...", { id: "geolocation" });
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
         setUserPosition([latitude, longitude]);
-        setSelectedReport(null); // Clear selected report when getting user location
-        toast.success("Lokasi Anda ditemukan!");
+        setSelectedReport(null);
+        toast.success("Lokasi Anda ditemukan!", { id: "geolocation" });
       },
       (error) => {
         console.error("Error getting location:", error);
-        toast.error("Tidak dapat menemukan lokasi Anda");
+        toast.error(
+          error.code === 1
+            ? "Akses lokasi ditolak. Izinkan akses lokasi di pengaturan browser Anda."
+            : "Tidak dapat menemukan lokasi Anda",
+          { id: "geolocation" }
+        );
       },
       { timeout: 10000, enableHighAccuracy: true }
     );
   }, []);
 
+  // Filter reports based on active filters
+  const filteredReports = useMemo(() => {
+    return reports.filter(
+      (report) =>
+        activeFilters.statuses.includes(report.status) &&
+        report.category &&
+        typeof report.category === "object" &&
+        activeFilters.categories.includes(report.category.id)
+    );
+  }, [activeFilters]);
+
+  // Apply filters
+  const handleApplyFilters = useCallback((filters: typeof activeFilters) => {
+    setActiveFilters(filters);
+  }, []);
+
   return (
-    <div className="relative h-[100vh] w-full">
+    <div className="relative h-screen w-full bg-muted/10 overflow-hidden">
       {/* Top navigation bar with background */}
       <div className="absolute top-0 left-0 right-0 z-50 bg-gradient-to-b from-background/90 to-transparent pt-3 pb-6 px-3 sm:px-4">
         <div className="flex justify-between items-center">
@@ -285,7 +254,7 @@ export default function MapView() {
             <Button
               variant="outline"
               size="icon"
-              className="bg-background/95 shadow-md rounded-full backdrop-blur-sm"
+              className="bg-background/95 shadow-md rounded-full backdrop-blur-sm border-muted/30 hover:bg-background"
               aria-label="Kembali ke beranda"
             >
               <ChevronLeft className="h-5 w-5" />
@@ -293,19 +262,35 @@ export default function MapView() {
           </Link>
 
           {/* Search or title */}
-          {searchVisible ? (
-            <SearchBar
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              searchLocation={searchLocation}
-              isSearching={isSearching}
-              setSearchVisible={setSearchVisible}
-            />
-          ) : (
-            <h1 className="text-base sm:text-lg font-bold bg-background/95 backdrop-blur-sm px-4 py-1.5 rounded-full shadow-md">
-              Peta Laporan
-            </h1>
-          )}
+          <AnimatePresence mode="wait">
+            {searchVisible ? (
+              <motion.div
+                key="search"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className="flex-1 mx-2"
+              >
+                <SearchBar
+                  searchQuery={searchQuery}
+                  setSearchQuery={setSearchQuery}
+                  searchLocation={searchLocation}
+                  isSearching={isSearching}
+                  onClose={() => setSearchVisible(false)}
+                />
+              </motion.div>
+            ) : (
+              <motion.h1
+                key="title"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className="text-base sm:text-lg font-bold bg-background/95 backdrop-blur-sm px-4 py-1.5 rounded-full shadow-md"
+              >
+                Peta Laporan
+              </motion.h1>
+            )}
+          </AnimatePresence>
 
           {/* Action buttons */}
           <div className="flex gap-2">
@@ -313,7 +298,7 @@ export default function MapView() {
               <Button
                 variant="outline"
                 size="icon"
-                className="bg-background/95 backdrop-blur-sm shadow-md rounded-full"
+                className="bg-background/95 backdrop-blur-sm shadow-md rounded-full border-muted/30 hover:bg-background/80"
                 onClick={() => setSearchVisible(true)}
                 aria-label="Cari lokasi"
               >
@@ -326,99 +311,28 @@ export default function MapView() {
                 <Button
                   variant="outline"
                   size="icon"
-                  className="bg-background/95 backdrop-blur-sm shadow-md rounded-full"
+                  className="bg-background/95 backdrop-blur-sm shadow-md rounded-full border-muted/30 hover:bg-background/80"
                   aria-label="Filter laporan"
                 >
                   <Filter className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent>
+              <SheetContent className="sm:max-w-md">
                 <SheetHeader>
                   <SheetTitle>Filter Laporan</SheetTitle>
                 </SheetHeader>
-                <div className="py-4 space-y-6">
-                  {/* Status filter */}
-                  <div className="space-y-3">
-                    <h3 className="font-medium">Status</h3>
-                    <div className="space-y-2">
-                      {["Menunggu", "Diproses", "Selesai", "Ditolak"].map(
-                        (status) => (
-                          <div
-                            key={status}
-                            className="flex items-center space-x-2"
-                          >
-                            <Checkbox id={`status-${status}`} defaultChecked />
-                            <Label htmlFor={`status-${status}`}>{status}</Label>
-                          </div>
-                        )
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Category filter */}
-                  <div className="space-y-3">
-                    <h3 className="font-medium">Kategori</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {categories.map((category) => (
-                        <div
-                          key={category.id}
-                          className="flex items-center space-x-2"
-                        >
-                          <Checkbox
-                            id={`category-${category.id}`}
-                            defaultChecked
-                          />
-                          <Label
-                            htmlFor={`category-${category.id}`}
-                            className="truncate"
-                          >
-                            {category.name}
-                          </Label>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Time period filter */}
-                  <div className="space-y-3">
-                    <h3 className="font-medium">Periode Waktu</h3>
-                    <div className="space-y-2">
-                      {[
-                        "Hari Ini",
-                        "Minggu Ini",
-                        "Bulan Ini",
-                        "Semua Waktu",
-                      ].map((period) => (
-                        <div
-                          key={period}
-                          className="flex items-center space-x-2"
-                        >
-                          <Checkbox
-                            id={`period-${period}`}
-                            defaultChecked={period === "Semua Waktu"}
-                          />
-                          <Label htmlFor={`period-${period}`}>{period}</Label>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2 pt-4">
-                    <Button variant="outline" className="flex-1 rounded-full">
-                      Reset
-                    </Button>
-                    <Button className="flex-1 rounded-full">
-                      Terapkan Filter
-                    </Button>
-                  </div>
-                </div>
+                <FilterPanel
+                  categories={categories}
+                  initialFilters={activeFilters}
+                  onApplyFilters={handleApplyFilters}
+                />
               </SheetContent>
             </Sheet>
 
             <Button
               variant="outline"
               size="icon"
-              className="bg-background/95 backdrop-blur-sm shadow-md rounded-full"
+              className="bg-background/95 backdrop-blur-sm shadow-md rounded-full border-muted/30 hover:bg-background/80"
               onClick={getUserLocation}
               aria-label="Temukan lokasi saya"
             >
@@ -429,12 +343,12 @@ export default function MapView() {
       </div>
 
       {/* OpenStreetMap */}
-      {mapReady && (
-        <div className="h-full w-full z-[1]">
+      {mapReady ? (
+        <div className="h-full w-full z-10">
           <MapContainer
             center={userPosition}
             zoom={13}
-            style={{ height: "100%", width: "100%", zIndex: 1 }}
+            style={{ height: "100%", width: "100%" }}
             attributionControl={false}
             zoomControl={false}
           >
@@ -443,8 +357,10 @@ export default function MapView() {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
 
+            <ZoomControl position="bottomright" />
+
             {/* Report markers */}
-            {reports.map((report) => {
+            {filteredReports.map((report) => {
               const coordinates = reportCoordinates[report.id] || userPosition;
               const icon = createMarkerIcon(report.status);
 
@@ -469,14 +385,32 @@ export default function MapView() {
             />
           </MapContainer>
         </div>
+      ) : (
+        <div className="h-full w-full flex items-center justify-center bg-muted/10">
+          <div className="flex flex-col items-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-muted-foreground/30 border-t-primary mb-4"></div>
+            <p className="text-muted-foreground">Memuat peta...</p>
+          </div>
+        </div>
       )}
 
       {/* Selected report card */}
-      {selectedReportData && (
-        <div className="absolute bottom-24 left-0 right-0 px-3 sm:px-4 max-w-2xl mx-auto z-30">
-          <ReportCard report={selectedReportData} />
-        </div>
-      )}
+      <AnimatePresence>
+        {selectedReportData && (
+          <motion.div
+            initial={{ opacity: 0, y: 100 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 100 }}
+            transition={{ type: "spring", damping: 20 }}
+            className="absolute bottom-8 left-0 right-0 px-3 sm:px-4 max-w-2xl mx-auto z-30"
+          >
+            <MapReportCard
+              report={selectedReportData}
+              onClose={() => setSelectedReport(null)}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
