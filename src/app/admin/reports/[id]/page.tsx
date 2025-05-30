@@ -26,7 +26,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { reports } from "@/lib/data";
+import { reports } from "@/lib/mock-data";
 import {
 	AlertTriangle,
 	Calendar,

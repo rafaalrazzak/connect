@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { reports } from "@/lib/data";
+import { reports } from "@/lib/mock-data";
 import { Filter, Layers, MapPin, Search, ZoomIn, ZoomOut } from "lucide-react";
 import { useEffect, useState } from "react";
 

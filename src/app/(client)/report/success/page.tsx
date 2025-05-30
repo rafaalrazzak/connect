@@ -1,77 +1,164 @@
+"use client";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { CheckCircle2, ArrowRight, Share2, Download } from "lucide-react";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 
 export default function ReportSuccess() {
-	// Generate a random report ID
-	const reportId = `CC${Math.floor(Math.random() * 10000000)
-		.toString()
-		.padStart(7, "0")}`;
+  // Generate a random report ID
+  const [reportData, setReportData] = useState<{
+    id: string;
+    date: Date;
+    category?: string;
+  }>({
+    id: "",
+    date: new Date(),
+  });
 
-	return (
-		<div className="container flex flex-col items-center justify-center px-4 py-12 text-center space-y-8">
-			<div className="w-20 h-20 rounded-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center shadow-md">
-				<CheckCircle2 className="h-10 w-10 text-green-600" />
-			</div>
+  // Initialize report data on mount
+  useEffect(() => {
+    // In a real app, this would come from API or context
+    // For now, we'll generate a random ID
+    setReportData({
+      id: `CC${Math.floor(Math.random() * 10000000)
+        .toString()
+        .padStart(7, "0")}`,
+      date: new Date(),
+      category: "Infrastruktur", // Optional: example category
+    });
+  }, []);
 
-			<div className="space-y-2 max-w-md">
-				<h1 className="text-2xl font-bold">Laporan Berhasil Dikirim!</h1>
-				<p className="text-muted-foreground">
-					Terima kasih atas kontribusimu! Laporan kamu sudah diteruskan ke pihak
-					yang berwenang.
-				</p>
-			</div>
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="container max-w-2xl flex flex-col items-center justify-center px-4 py-12 text-center space-y-8"
+    >
+      <motion.div
+        initial={{ scale: 0.8 }}
+        animate={{ scale: 1 }}
+        transition={{ delay: 0.2, type: "spring" }}
+        className="w-20 h-20 rounded-full bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900 dark:to-green-800 flex items-center justify-center shadow-md"
+      >
+        <CheckCircle2 className="h-10 w-10 text-green-600 dark:text-green-400" />
+      </motion.div>
 
-			<Card className="w-full max-w-md p-6 border-green-200 bg-green-50/50 shadow-sm">
-				<div className="space-y-4">
-					<div className="flex justify-between items-center">
-						<h2 className="font-semibold">Detail Laporan</h2>
-						<Badge
-							variant="outline"
-							className="bg-green-100 text-green-800 border-green-200 shadow-sm"
-						>
-							Terkirim
-						</Badge>
-					</div>
+      <div className="space-y-2 max-w-md">
+        <h1 className="text-2xl font-bold text-foreground">
+          Laporan Berhasil Dikirim!
+        </h1>
+        <p className="text-muted-foreground">
+          Terima kasih atas kontribusimu! Laporan kamu sudah diteruskan ke pihak
+          yang berwenang.
+        </p>
+      </div>
 
-					<div className="space-y-3 text-left">
-						<div className="flex justify-between border-b border-green-100 pb-2">
-							<span className="text-muted-foreground">ID Laporan:</span>
-							<span className="font-medium">{reportId}</span>
-						</div>
-						<div className="flex justify-between border-b border-green-100 pb-2">
-							<span className="text-muted-foreground">Dikirim pada:</span>
-							<span>{new Date().toLocaleDateString()}</span>
-						</div>
-						<div className="flex justify-between border-b border-green-100 pb-2">
-							<span className="text-muted-foreground">Estimasi respons:</span>
-							<span>24-48 jam</span>
-						</div>
-					</div>
+      <Card className="w-full max-w-md border-green-200 dark:border-green-900 bg-green-50/50 dark:bg-green-950/30 shadow-sm">
+        <CardHeader className="pb-2">
+          <div className="flex justify-between items-center">
+            <h2 className="font-semibold text-foreground">Detail Laporan</h2>
+            <Badge
+              variant="outline"
+              className="bg-green-100 dark:bg-green-900/60 text-green-800 dark:text-green-300 border-green-200 dark:border-green-800"
+            >
+              Terkirim
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-3 text-left">
+            <div className="flex justify-between items-center border-b border-green-100 dark:border-green-900/50 pb-2">
+              <span className="text-muted-foreground">ID Laporan</span>
+              <span className="font-medium text-foreground">
+                {reportData.id}
+              </span>
+            </div>
+            {reportData.category && (
+              <div className="flex justify-between items-center border-b border-green-100 dark:border-green-900/50 pb-2">
+                <span className="text-muted-foreground">Kategori</span>
+                <span className="text-foreground">{reportData.category}</span>
+              </div>
+            )}
+            <div className="flex justify-between items-center border-b border-green-100 dark:border-green-900/50 pb-2">
+              <span className="text-muted-foreground">Dikirim pada</span>
+              <span className="text-foreground">
+                {reportData.date.toLocaleDateString("id-ID", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </span>
+            </div>
+            <div className="flex justify-between items-center border-b border-green-100 dark:border-green-900/50 pb-2">
+              <span className="text-muted-foreground">Estimasi respons</span>
+              <span className="text-foreground">24-48 jam</span>
+            </div>
+          </div>
 
-					<div className="text-sm bg-white p-4 rounded-lg border border-green-200 shadow-sm">
-						<p className="text-green-800">
-							Kamu akan mendapat notifikasi seiring perkembangan laporan ini.
-						</p>
-					</div>
-				</div>
-			</Card>
+          <div className="text-sm bg-white dark:bg-zinc-900 p-4 rounded-lg border border-green-200 dark:border-green-900 shadow-sm">
+            <p className="text-green-800 dark:text-green-400">
+              Kamu akan mendapat notifikasi seiring perkembangan laporan ini.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
 
-			<div className="flex flex-col w-full max-w-md space-y-3">
-				<Link href={`/report/${reportId}`}>
-					<Button className="w-full rounded-full">
-						Lihat Detail Laporan
-						<ArrowRight className="ml-2 h-4 w-4" />
-					</Button>
-				</Link>
-				<Link href="/">
-					<Button variant="outline" className="w-full rounded-full">
-						Kembali ke Beranda
-					</Button>
-				</Link>
-			</div>
-		</div>
-	);
+      <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md">
+        <Link href={`/report/${reportData.id}`} className="flex-1">
+          <Button className="w-full rounded-full" size="lg">
+            Lihat Detail
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </Link>
+        <Link href="/" className="flex-1">
+          <Button variant="outline" className="w-full rounded-full" size="lg">
+            Kembali ke Beranda
+          </Button>
+        </Link>
+      </div>
+
+      <div className="flex gap-4 pt-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-muted-foreground hover:text-foreground"
+          onClick={() => {
+            // In a real app, implement share functionality
+            if (navigator.share) {
+              navigator
+                .share({
+                  title: `Laporan ${reportData.id}`,
+                  text: `Laporan berhasil dikirim dengan ID: ${reportData.id}`,
+                  url: window.location.href,
+                })
+                .catch((err) => console.error("Error sharing:", err));
+            } else {
+              navigator.clipboard.writeText(window.location.href);
+              alert("Link berhasil disalin!");
+            }
+          }}
+        >
+          <Share2 className="h-4 w-4 mr-2" />
+          Bagikan
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-muted-foreground hover:text-foreground"
+          onClick={() => {
+            // In a real app, implement download functionality
+            window.print();
+          }}
+        >
+          <Download className="h-4 w-4 mr-2" />
+          Simpan
+        </Button>
+      </div>
+    </motion.div>
+  );
 }

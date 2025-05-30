@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
-import { reports } from "@/lib/data";
+import { reports } from "@/lib/mock-data";
 import type { ColumnDef } from "@tanstack/react-table";
 import {
 	AlertTriangle,

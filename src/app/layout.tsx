@@ -9,27 +9,27 @@ import { Toaster } from "@/components/ui/sonner";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-	title: "Citizen Connect",
-	description: "Public service reporting application",
-	generator: "v0.dev",
+  title: "Citizen Connect",
+  description: "Public service reporting application",
+  generator: "v0.dev",
 };
 
 export default function RootLayout({
-	children,
+  children,
 }: Readonly<{
-	children: React.ReactNode;
+  children: React.ReactNode;
 }>) {
-	return (
-		<html lang="en" suppressHydrationWarning>
-			<body className={inter.className}>
-				<ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-					<main>
-						<Splash />
-						{children}
-						<Toaster />
-					</main>
-				</ThemeProvider>
-			</body>
-		</html>
-	);
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body className={inter.className}>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+          <main>
+            {/* <Splash /> */}
+            {children}
+            <Toaster />
+          </main>
+        </ThemeProvider>
+      </body>
+    </html>
+  );
 }
