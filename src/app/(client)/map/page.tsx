@@ -2,11 +2,18 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { type FC, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  memo,
+  type FC,
+} from "react";
 import { toast } from "sonner";
 import { AnimatePresence, motion } from "framer-motion";
 
-// UI Components
+// Components
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -15,26 +22,72 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-
 import { FilterPanel } from "@/components/map/filter-panel";
 import { SearchBar } from "@/components/map/search-bar";
-import { MapReportCard } from "@/components/map/report-card";
+import { ReportCard } from "@/components/report-card";
 
 // Icons
-import { ChevronLeft, Filter, Locate, Search } from "lucide-react";
+import {
+  ChevronLeft,
+  Filter,
+  Locate,
+  Search,
+  Home,
+  MapPin,
+  Bell,
+  User,
+  X,
+} from "lucide-react";
 
 // Data & Types
 import { categories, reports } from "@/lib/mock-data";
+import type { Report } from "@/types/report";
 import type { LatLngTuple } from "leaflet";
 
-// Hooks
-import { useMapOperations } from "@/hooks/use-map-operations";
+// Leaflet CSS
+import "leaflet/dist/leaflet.css";
 
-// Dynamically import map components to avoid SSR issues
+// Types
+type FilterState = {
+  statuses: string[];
+  categories: string[];
+  timePeriod: string;
+};
+
+interface MapControllerProps {
+  selectedReport: string | null;
+  userPosition: LatLngTuple;
+}
+
+interface BottomNavigationProps {
+  className?: string;
+}
+
+// Constants
+const MARKER_ICON_URL =
+  "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png";
+const MARKER_ICON_2X_URL =
+  "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png";
+const MARKER_SHADOW_URL =
+  "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png";
+const DEFAULT_POSITION: LatLngTuple = [-6.2, 106.816666]; // Jakarta
+
+// Sample coordinates for reports
+const reportCoordinates: Record<string, LatLngTuple> = {
+  "report-1": [-6.2, 106.816666],
+  "report-2": [-6.205, 106.82],
+  "report-3": [-6.195, 106.812],
+  "report-4": [-6.21, 106.818],
+  "report-5": [-6.202, 106.83],
+  "report-6": [-6.198, 106.805],
+};
+
+// Dynamically import map components
 const MapContainer = dynamic(
   () => import("react-leaflet").then((mod) => mod.MapContainer),
-  { ssr: false }
+  { ssr: false, loading: () => <MapLoadingPlaceholder /> }
 );
+
 const TileLayer = dynamic(
   () => import("react-leaflet").then((mod) => mod.TileLayer),
   { ssr: false }
@@ -48,75 +101,100 @@ const ZoomControl = dynamic(
   { ssr: false }
 );
 
-// Sample coordinates for reports - in production this would come from the database
-const reportCoordinates: Record<string, LatLngTuple> = {
-  "report-1": [-6.2, 106.816666],
-  "report-2": [-6.205, 106.82],
-  "report-3": [-6.195, 106.812],
-  "report-4": [-6.21, 106.818],
-  "report-5": [-6.202, 106.83],
-  "report-6": [-6.198, 106.805],
-};
+// Loading placeholder
+const MapLoadingPlaceholder: FC = memo(() => (
+  <div className="h-full w-full flex items-center justify-center bg-muted/10">
+    <div className="flex flex-col items-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-4 border-muted-foreground/30 border-t-primary mb-4" />
+      <p className="text-muted-foreground">Memuat peta...</p>
+    </div>
+  </div>
+));
+MapLoadingPlaceholder.displayName = "MapLoadingPlaceholder";
 
-interface MapControllerProps {
-  selectedReport: string | null;
-  userPosition: LatLngTuple;
-}
-
-// Helper component to fly to selected report - extracted for clarity
+// Helper component to fly to selected report
 const MapController: FC<MapControllerProps> = ({
   selectedReport,
   userPosition,
 }) => {
-  const { flyToLocation } = useMapOperations();
+  const { useMap } = require("react-leaflet");
+  const map = useMap();
 
   useEffect(() => {
-    if (selectedReport && reportCoordinates[selectedReport]) {
-      flyToLocation(reportCoordinates[selectedReport], 16);
-    } else {
-      flyToLocation(userPosition, 13);
-    }
-  }, [selectedReport, userPosition, flyToLocation]);
+    if (!map) return;
+
+    const target =
+      selectedReport && reportCoordinates[selectedReport]
+        ? { coords: reportCoordinates[selectedReport], zoom: 16 }
+        : { coords: userPosition, zoom: 13 };
+
+    map.flyTo(target.coords, target.zoom, { animate: true, duration: 1 });
+  }, [selectedReport, userPosition, map]);
 
   return null;
 };
 
 export default function MapView() {
-  // Core state
+  // State
   const [selectedReport, setSelectedReport] = useState<string | null>(null);
-  const [searchVisible, setSearchVisible] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isSearching, setIsSearching] = useState(false);
-  const [mapReady, setMapReady] = useState(false);
-  const [userPosition, setUserPosition] = useState<LatLngTuple>([
-    -6.2, 106.816666,
-  ]);
-  const [activeFilters, setActiveFilters] = useState({
+  const [searchVisible, setSearchVisible] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [isSearching, setIsSearching] = useState<boolean>(false);
+  const [mapReady, setMapReady] = useState<boolean>(false);
+  const [userPosition, setUserPosition] =
+    useState<LatLngTuple>(DEFAULT_POSITION);
+  const [activeFilters, setActiveFilters] = useState<FilterState>({
     statuses: ["pending", "in_progress", "completed", "rejected"],
     categories: categories.map((c) => c.id),
     timePeriod: "all",
   });
 
-  // Get the selected report data
-  const selectedReportData = useMemo(
+  // Get selected report
+  const selectedReportData = useMemo<Report | null>(
     () =>
-      selectedReport ? reports.find((r) => r.id === selectedReport) : null,
+      selectedReport
+        ? reports.find((r) => r.id === selectedReport) || null
+        : null,
     [selectedReport]
   );
 
   // Initialize Leaflet
   useEffect(() => {
-    const initLeaflet = async () => {
+    const initLeaflet = async (): Promise<(() => void) | undefined> => {
       try {
         const L = await import("leaflet");
-        // Fix default icon paths
+
+        // Fix icon paths
         delete L.Icon.Default.prototype._getIconUrl;
         L.Icon.Default.mergeOptions({
-          iconUrl: "/images/map/marker-icon.png",
-          iconRetinaUrl: "/images/map/marker-icon-2x.png",
-          shadowUrl: "/images/map/marker-shadow.png",
+          iconUrl: MARKER_ICON_URL,
+          iconRetinaUrl: MARKER_ICON_2X_URL,
+          shadowUrl: MARKER_SHADOW_URL,
         });
+
+        // Add map styles
+        const style = document.createElement("style");
+        style.innerHTML = `
+          .leaflet-container {
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+          }
+          .marker-pending { filter: hue-rotate(200deg); }
+          .marker-in_progress { filter: hue-rotate(60deg); }
+          .marker-completed { filter: hue-rotate(120deg); }
+          .marker-rejected { filter: hue-rotate(280deg); }
+        `;
+        document.head.appendChild(style);
+
         setMapReady(true);
+
+        return () => {
+          document.head.removeChild(style);
+        };
       } catch (error) {
         console.error("Failed to initialize Leaflet:", error);
         toast.error("Gagal memuat peta. Coba muat ulang halaman.");
@@ -124,32 +202,18 @@ export default function MapView() {
     };
 
     initLeaflet();
-
-    // Add CSS to customize markers by status
-    const style = document.createElement("style");
-    style.innerHTML = `
-      .marker-pending { filter: hue-rotate(200deg); }
-      .marker-in_progress { filter: hue-rotate(60deg); }
-      .marker-completed { filter: hue-rotate(120deg); }
-      .marker-rejected { filter: hue-rotate(280deg); }
-    `;
-    document.head.appendChild(style);
-
-    return () => {
-      document.head.removeChild(style);
-    };
   }, []);
 
-  // Create marker icon (memoized)
+  // Create marker icon
   const createMarkerIcon = useCallback((status: string) => {
     if (typeof window === "undefined") return null;
 
     try {
       const L = require("leaflet");
       return new L.Icon({
-        iconUrl: "/images/map/marker-icon.png",
-        iconRetinaUrl: "/images/map/marker-icon-2x.png",
-        shadowUrl: "/images/map/marker-shadow.png",
+        iconUrl: MARKER_ICON_URL,
+        iconRetinaUrl: MARKER_ICON_2X_URL,
+        shadowUrl: MARKER_SHADOW_URL,
         iconSize: [25, 41],
         iconAnchor: [12, 41],
         popupAnchor: [1, -34],
@@ -162,8 +226,8 @@ export default function MapView() {
     }
   }, []);
 
-  // Search location function
-  const searchLocation = useCallback(async () => {
+  // Search location
+  const searchLocation = useCallback(async (): Promise<void> => {
     if (!searchQuery.trim()) return;
 
     setIsSearching(true);
@@ -182,7 +246,7 @@ export default function MapView() {
 
       if (data && data.length > 0) {
         const { lat, lon, display_name } = data[0];
-        setUserPosition([Number.parseFloat(lat), Number.parseFloat(lon)]);
+        setUserPosition([Number(lat), Number(lon)]);
         setSelectedReport(null);
         toast.success(`Lokasi ditemukan: ${display_name.split(",")[0]}`);
       } else {
@@ -196,8 +260,8 @@ export default function MapView() {
     }
   }, [searchQuery]);
 
-  // Get user's current location
-  const getUserLocation = useCallback(() => {
+  // Get user location
+  const getUserLocation = useCallback((): void => {
     if (!navigator.geolocation) {
       toast.error("Browser Anda tidak mendukung geolokasi");
       return;
@@ -225,25 +289,26 @@ export default function MapView() {
     );
   }, []);
 
-  // Filter reports based on active filters
-  const filteredReports = useMemo(() => {
-    return reports.filter(
-      (report) =>
-        activeFilters.statuses.includes(report.status) &&
-        report.category &&
-        typeof report.category === "object" &&
-        activeFilters.categories.includes(report.category.id)
-    );
-  }, [activeFilters]);
+  // Filter reports
+  const filteredReports = useMemo(
+    () =>
+      reports.filter(
+        (report) =>
+          activeFilters.statuses.includes(report.status) &&
+          report.category?.id &&
+          activeFilters.categories.includes(report.category.id)
+      ),
+    [activeFilters]
+  );
 
-  // Apply filters
-  const handleApplyFilters = useCallback((filters: typeof activeFilters) => {
-    setActiveFilters(filters);
+  // Handle filter changes
+  const handleApplyFilters = useCallback((newFilters: FilterState): void => {
+    setActiveFilters(newFilters);
   }, []);
 
   return (
-    <div className="relative h-screen w-full bg-muted/10 overflow-hidden">
-      {/* Top navigation bar with background */}
+    <div className="fixed inset-0 overflow-hidden bg-background">
+      {/* Top navigation bar */}
       <div className="absolute top-0 left-0 right-0 z-50 bg-gradient-to-b from-background/90 to-transparent pt-3 pb-6 px-3 sm:px-4">
         <div className="flex justify-between items-center">
           {/* Back button */}
@@ -251,7 +316,7 @@ export default function MapView() {
             <Button
               variant="outline"
               size="icon"
-              className="bg-background/95 shadow-md rounded-full backdrop-blur-sm border-muted/30 hover:bg-background"
+              className="bg-background/95 shadow-md rounded-full backdrop-blur-sm border-muted/30"
               aria-label="Kembali ke beranda"
             >
               <ChevronLeft className="h-5 w-5" />
@@ -295,7 +360,7 @@ export default function MapView() {
               <Button
                 variant="outline"
                 size="icon"
-                className="bg-background/95 backdrop-blur-sm shadow-md rounded-full border-muted/30 hover:bg-background/80"
+                className="bg-background/95 shadow-md rounded-full backdrop-blur-sm border-muted/30"
                 onClick={() => setSearchVisible(true)}
                 aria-label="Cari lokasi"
               >
@@ -308,7 +373,7 @@ export default function MapView() {
                 <Button
                   variant="outline"
                   size="icon"
-                  className="bg-background/95 backdrop-blur-sm shadow-md rounded-full border-muted/30 hover:bg-background/80"
+                  className="bg-background/95 shadow-md rounded-full backdrop-blur-sm border-muted/30"
                   aria-label="Filter laporan"
                 >
                   <Filter className="h-5 w-5" />
@@ -329,7 +394,7 @@ export default function MapView() {
             <Button
               variant="outline"
               size="icon"
-              className="bg-background/95 backdrop-blur-sm shadow-md rounded-full border-muted/30 hover:bg-background/80"
+              className="bg-background/95 shadow-md rounded-full backdrop-blur-sm border-muted/30"
               onClick={getUserLocation}
               aria-label="Temukan lokasi saya"
             >
@@ -339,19 +404,19 @@ export default function MapView() {
         </div>
       </div>
 
-      {/* OpenStreetMap */}
-      {mapReady ? (
-        <div className="h-full w-full z-10">
+      {/* Map Container */}
+      <div className="absolute inset-0 pb-16">
+        {mapReady ? (
           <MapContainer
             center={userPosition}
             zoom={13}
-            style={{ height: "100%", width: "100%" }}
+            className="z-10"
             attributionControl={false}
             zoomControl={false}
           >
             <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             />
 
             <ZoomControl position="bottomright" />
@@ -375,21 +440,15 @@ export default function MapView() {
               );
             })}
 
-            {/* Controller to handle map movements */}
             <MapController
               selectedReport={selectedReport}
               userPosition={userPosition}
             />
           </MapContainer>
-        </div>
-      ) : (
-        <div className="h-full w-full flex items-center justify-center bg-muted/10">
-          <div className="flex flex-col items-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-muted-foreground/30 border-t-primary mb-4" />
-            <p className="text-muted-foreground">Memuat peta...</p>
-          </div>
-        </div>
-      )}
+        ) : (
+          <MapLoadingPlaceholder />
+        )}
+      </div>
 
       {/* Selected report card */}
       <AnimatePresence>
@@ -399,12 +458,21 @@ export default function MapView() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 100 }}
             transition={{ type: "spring", damping: 20 }}
-            className="absolute bottom-8 left-0 right-0 px-3 sm:px-4 max-w-2xl mx-auto z-30"
+            className="absolute bottom-20 left-0 right-0 px-3 sm:px-4 max-w-2xl mx-auto z-30"
           >
-            <MapReportCard
+            <ReportCard
               report={selectedReportData}
-              onClose={() => setSelectedReport(null)}
+              className="bg-background/95 backdrop-blur-sm shadow-lg"
             />
+            <Button
+              onClick={() => setSelectedReport(null)}
+              variant="outline"
+              size="sm"
+              className="absolute -top-2 -right-1 rounded-full bg-background shadow-md h-8 w-8 p-0"
+              aria-label="Close report details"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </motion.div>
         )}
       </AnimatePresence>
