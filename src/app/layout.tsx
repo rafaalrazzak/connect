@@ -10,63 +10,102 @@ import { ReportDrawerProvider } from "@/contexts/report-drawer-context";
 
 const inter = Inter({ subsets: ["latin"] });
 
+// Base URLs and assets
+const APP_NAME = "Kita - Citizen Connect";
+const APP_DESCRIPTION = "Public service reporting platform by Kita";
+const BASE_URL = "https://connect.kita.blue";
+const OG_IMAGE = "https://cdn.kita.blue/kita/thumbnail.png";
+const LOGO_PATH = "/logo.png";
+
 export const metadata: Metadata = {
-  title: "Citizen Connect",
-  description: "Public service reporting application",
+  title: APP_NAME,
+  description: APP_DESCRIPTION,
+  applicationName: APP_NAME,
+  generator: "Next.js",
+  keywords: ["citizen", "public service", "reporting", "community", "kita"],
+  authors: [{ name: "Kita", url: "https://kita.blue" }],
+  creator: "Kita",
+  publisher: "Kita",
+
+  // Open Graph metadata
   openGraph: {
-    title: "Citizen Connect",
-    description: "Public service reporting application",
-    url: "https://connect.kita.blue",
-    siteName: "Citizen Connect",
+    type: "website",
+    siteName: APP_NAME,
+    title: APP_NAME,
+    description: APP_DESCRIPTION,
+    url: BASE_URL,
+    locale: "en_US",
     images: [
       {
-        url: "https://cdn.kita.blue/kita/thumbnail.png",
+        url: OG_IMAGE,
         width: 1200,
         height: 630,
-        alt: "Citizen Connect Open Graph Image",
+        alt: `${APP_NAME} - ${APP_DESCRIPTION}`,
       },
     ],
-    locale: "en_US",
-    type: "website",
   },
+
+  // Twitter metadata
   twitter: {
     card: "summary_large_image",
-    title: "Citizen Connect",
-    description: "Public service reporting application",
-    images: ["https://cdn.kita.blue/kita/thumbnail.png"],
+    title: APP_NAME,
+    description: APP_DESCRIPTION,
+    images: [OG_IMAGE],
+    creator: "@KitaOfficial",
   },
+
+  // App icons
   icons: {
-    icon: "/logo.png",
-    shortcut: "/logo.png",
-    apple: "/logo.png",
+    icon: LOGO_PATH,
+    shortcut: LOGO_PATH,
+    apple: LOGO_PATH,
+    other: {
+      rel: "apple-touch-icon",
+      url: LOGO_PATH,
+    },
   },
+
+  // Theme and manifest
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#000000" },
+    { media: "(prefers-color-scheme: dark)", color: "#0f172a" },
   ],
   manifest: "/manifest.json",
+
+  // Mobile web app configuration
   appleWebApp: {
     capable: true,
-    title: "Citizen Connect",
+    title: APP_NAME,
     statusBarStyle: "default",
   },
-  metadataBase: new URL("https://connect.kita.blue"),
+
+  // Base URL for canonical links
+  metadataBase: new URL(BASE_URL),
+
+  // Crawler directives
   robots: {
     index: true,
     follow: true,
     nocache: false,
-    noarchive: false,
-    nosnippet: false,
-    noimageindex: false,
-  },
-  alternates: {
-    canonical: "https://connect.kita.blue",
-    types: {
-      "application/rss+xml": "/feed.xml",
-      "application/atom+xml": "/atom.xml",
-      "application/json": "/api/metadata.json",
-      "application/ld+json": "/api/metadata.json",
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
     },
+  },
+
+  // Alternative formats
+  alternates: {
+    canonical: BASE_URL,
+    languages: {
+      "en-US": `${BASE_URL}/en-US`,
+      "id-ID": `${BASE_URL}/id-ID`,
+    },
+  },
+
+  // Verification for search engines
+  verification: {
+    google: "google-site-verification-code", // Replace with actual code if available
   },
 };
 
