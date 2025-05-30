@@ -1,58 +1,56 @@
 import { faker } from "@faker-js/faker";
 
 import type { Category, Report, ReportStatus } from "@/types/report";
-import {
-	Building,
-	Car,
-	Construction,
-	Lightbulb,
-	Shield,
-	Trash2,
-	Trees,
-	Wifi,
-} from "lucide-react";
 
 // Simplified categories with essential properties
 export const categories: Category[] = [
 	{
-		id: "road-damage",
+		id: "1",
 		name: "Kerusakan Jalan",
-		icon: Construction,
+		iconName: "Construction",
+		description: "Laporkan masalah pada jalan",
 	},
 	{
-		id: "street-lights",
+		id: "2",
 		name: "Lampu Jalan",
-		icon: Lightbulb,
+		iconName: "Lightbulb",
+		description: "Laporkan masalah pada lampu jalan",
 	},
 	{
-		id: "waste-issues",
+		id: "3",
 		name: "Masalah Sampah",
-		icon: Trash2,
+		iconName: "Trash2",
+		description: "Laporkan masalah sampah",
 	},
 	{
-		id: "public-order",
+		id: "4",
 		name: "Ketertiban Umum",
-		icon: Shield,
+		iconName: "Shield",
+		description: "Laporkan masalah ketertiban umum",
 	},
 	{
-		id: "public-facilities",
+		id: "5",
 		name: "Fasilitas Umum",
-		icon: Building,
+		iconName: "Building",
+		description: "Laporkan kerusakan fasilitas umum",
 	},
 	{
-		id: "traffic",
+		id: "6",
 		name: "Lalu Lintas",
-		icon: Car,
+		iconName: "Car",
+		description: "Laporkan masalah lalu lintas",
 	},
 	{
-		id: "environment",
+		id: "7",
 		name: "Lingkungan",
-		icon: Trees,
+		iconName: "Trees",
+		description: "Laporkan masalah lingkungan",
 	},
 	{
-		id: "utilities",
+		id: "8",
 		name: "Utilitas",
-		icon: Wifi,
+		iconName: "Wifi",
+		description: "Laporkan masalah utilitas",
 	},
 ];
 
