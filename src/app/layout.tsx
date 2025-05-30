@@ -5,6 +5,8 @@ import "@/app/globals.css";
 import { Splash } from "@/components/splash";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { ReportDrawerProvider } from "@/contexts/report-drawer-context";
+import CreateReportDrawer from "@/components/report/create-report-drawer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,9 +26,12 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <main>
-            <Splash />
-            {children}
-            <Toaster />
+            <ReportDrawerProvider>
+              <Splash />
+              {children}
+              <Toaster />
+              <CreateReportDrawer />
+            </ReportDrawerProvider>
           </main>
         </ThemeProvider>
       </body>
