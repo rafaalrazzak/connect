@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { ChevronLeft, List, Map as MapIcon } from "lucide-react";
 
@@ -22,7 +21,7 @@ import { useReportFilters } from "@/hooks/use-report-filters";
 // Data
 import { reports } from "@/lib/mock-data";
 
-export default function ReportsPage() {
+function ReportContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState<"list" | "map">("list");
 
@@ -144,5 +143,13 @@ export default function ReportsPage() {
         <MapView />
       )}
     </div>
+  );
+}
+
+export default function ReportsPage() {
+  return (
+    <Suspense>
+      <ReportContent />
+    </Suspense>
   );
 }

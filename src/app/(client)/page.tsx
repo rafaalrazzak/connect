@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ChevronRight, FileEdit } from "lucide-react";
@@ -19,7 +19,7 @@ import { useReportDrawer } from "@/contexts/report-drawer-context";
 // Data
 import { reports } from "@/lib/mock-data";
 
-export default function Home() {
+function HomeContent() {
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(true);
   const [loadedReports, setLoadedReports] = useState<typeof reports>([]);
@@ -120,5 +120,13 @@ export default function Home() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <Suspense>
+      <HomeContent />
+    </Suspense>
   );
 }

@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { type FC, useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -16,19 +16,16 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-// Custom Components
-import ReportStatusBadge from "@/components/report-status-badge";
 import { FilterPanel } from "@/components/map/filter-panel";
 import { SearchBar } from "@/components/map/search-bar";
 import { MapReportCard } from "@/components/map/report-card";
 
 // Icons
-import { ChevronLeft, Filter, Locate, Search, X } from "lucide-react";
+import { ChevronLeft, Filter, Locate, Search } from "lucide-react";
 
 // Data & Types
 import { categories, reports } from "@/lib/mock-data";
 import type { LatLngTuple } from "leaflet";
-import type { Report } from "@/types/report";
 
 // Hooks
 import { useMapOperations } from "@/hooks/use-map-operations";
@@ -388,7 +385,7 @@ export default function MapView() {
       ) : (
         <div className="h-full w-full flex items-center justify-center bg-muted/10">
           <div className="flex flex-col items-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-muted-foreground/30 border-t-primary mb-4"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-muted-foreground/30 border-t-primary mb-4" />
             <p className="text-muted-foreground">Memuat peta...</p>
           </div>
         </div>

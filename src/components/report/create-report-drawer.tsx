@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, memo, useEffect } from "react";
+import { useCallback, memo, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 // UI Components
@@ -46,7 +46,6 @@ import { PhotoStep } from "./steps/photo-step";
 import { ReviewStep } from "./steps/review-step";
 
 // Utils & Hooks
-import { useMediaQuery } from "@/hooks/use-media-query";
 import { cn } from "@/lib/utils";
 import { useReportForm } from "@/hooks/use-report-form";
 
@@ -106,13 +105,15 @@ export default function CreateReportDrawer() {
 
   return (
     <Drawer open={isOpen} onOpenChange={(open) => !open && closeDrawer()}>
-      <DrawerContentWrapper
-        open={isOpen}
-        onClose={handleClose}
-        className=""
-        prefillData={prefillData}
-        onSuccess={onSuccess}
-      />
+      <Suspense>
+        <DrawerContentWrapper
+          open={isOpen}
+          onClose={handleClose}
+          className=""
+          prefillData={prefillData}
+          onSuccess={onSuccess}
+        />
+      </Suspense>
     </Drawer>
   );
 }
