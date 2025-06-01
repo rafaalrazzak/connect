@@ -40,7 +40,7 @@ import {
 // Data & Types
 import { categories, reports } from "@/lib/mock-data";
 import type { Coordinates } from "@/types/map";
-import type { Report, ReportStatus } from "@/types/report";
+import type { Report } from "@/types/report";
 
 // Leaflet CSS
 import "leaflet/dist/leaflet.css";
@@ -52,9 +52,6 @@ type FilterState = {
 	timePeriod: string;
 };
 
-// Indonesia default center position
-const INDONESIA_DEFAULT_POSITION: Coordinates = [0.7893, 113.9213];
-
 export default function MapView() {
 	// State management
 	const [mapState, setMapState] = useState({
@@ -63,7 +60,6 @@ export default function MapView() {
 		isMarkerSelected: false,
 		drawerOpen: false,
 		isDrawerAnimating: false,
-		// Store a user-selected position when searching
 		searchPosition: null as Coordinates | null,
 	});
 

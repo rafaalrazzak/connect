@@ -1,8 +1,6 @@
 "use client";
 
-import "leaflet/dist/leaflet.css";
 import { cn } from "@/lib/utils";
-import L from "leaflet";
 import {
 	ChevronDown,
 	ChevronLeft,
@@ -16,13 +14,18 @@ import {
 	ZoomIn,
 	ZoomOut,
 } from "lucide-react";
-import dynamic from "next/dynamic";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "./ui/button";
+
+// Import Leaflet only on client side
+import dynamic from "next/dynamic";
+import "leaflet/dist/leaflet.css";
+
+// Import Leaflet types for TypeScript support (doesn't bundle the actual library)
+import type { DivIcon, LayerGroup, Map as LeafletMap, Marker } from "leaflet";
 
 // Define position options for toggle controls
 type TogglePosition = "top-left" | "top-right" | "bottom-left" | "bottom-right";
-
 type Coordinates = [number, number];
 
 interface MapMarker {
@@ -49,87 +52,16 @@ interface LocationMapProps {
 	drawerInitiallyExpanded?: boolean;
 	drawerTitle?: string;
 	onDrawerToggle?: (isExpanded: boolean) => void;
-	// New prop for toggle control position
 	togglePosition?: TogglePosition;
 }
 
-const INDONESIA_DEFAULT_POSITION = [0.7893, 113.9213]; // Center of Indonesia
+const INDONESIA_DEFAULT_POSITION: Coordinates = [0.7893, 113.9213]; // Center of Indonesia
 
-// Helper function to get position classes based on toggle position
-const getTogglePositionClasses = (position: TogglePosition): string => {
-	switch (position) {
-		case "top-left":
-			return "top-3 left-3";
-		case "top-right":
-			return "top-3 right-3";
-		case "bottom-left":
-			return "bottom-20 left-3"; // Leave space for drawer
-		case "bottom-right":
-			return "bottom-20 right-3"; // Leave space for drawer
-		default:
-			return "top-3 left-3";
-	}
-};
-
-// Helper function to get panel position classes based on toggle position
-const getPanelPositionClasses = (position: TogglePosition): string => {
-	switch (position) {
-		case "top-left":
-			return "top-16 left-3";
-		case "top-right":
-			return "top-16 right-3";
-		case "bottom-left":
-			return "bottom-32 left-3"; // Position above toggle
-		case "bottom-right":
-			return "bottom-32 right-3"; // Position above toggle
-		default:
-			return "top-16 left-3";
-	}
-};
-
-// Helper function to get transform classes for slide animation
-const getTransformClasses = (
-	position: TogglePosition,
-	expanded: boolean,
-): string => {
-	if (expanded) return "opacity-100 translate-x-0";
-
-	switch (position) {
-		case "top-left":
-		case "bottom-left":
-			return "opacity-0 -translate-x-full pointer-events-none";
-		case "top-right":
-		case "bottom-right":
-			return "opacity-0 translate-x-full pointer-events-none";
-		default:
-			return "opacity-0 -translate-x-full pointer-events-none";
-	}
-};
-
-// Helper function to get the appropriate chevron icon based on position and state
-const getChevronIcon = (position: TogglePosition, expanded: boolean) => {
-	if (position.includes("right")) {
-		return expanded ? (
-			<ChevronRight className="h-5 w-5" />
-		) : (
-			<ChevronLeft className="h-5 w-5" />
-		);
-	}
-	return expanded ? (
-		<ChevronLeft className="h-5 w-5" />
-	) : (
-		<ChevronRight className="h-5 w-5" />
-	);
-};
-
-/**
- * Interactive map component built on Leaflet
- * Google Maps style behavior and controls
- */
-const LocationMap: React.FC<LocationMapProps> = ({
+// Core component implementation with dynamic Leaflet import
+const LocationMapComponent: React.FC<LocationMapProps> = ({
 	position = INDONESIA_DEFAULT_POSITION,
 	popupText = "Lokasi",
-	zoom = 5, // Better default zoom for Indonesia
+	zoom = 5,
 	className = "",
 	interactive = true,
 	showZoomControls = false,
@@ -142,10 +74,18 @@ const LocationMap: React.FC<LocationMapProps> = ({
 	drawerInitiallyExpanded = true,
 	drawerTitle,
 	onDrawerToggle,
-	// Default position for toggle controls
 	togglePosition = "top-left",
 }) => {
-	// State
+	// Import Leaflet dynamically
+	const L = useMemo(() => {
+		// Import and return the library - only run in browser
+		if (typeof window !== "undefined") {
+			return require("leaflet");
+		}
+		return null;
+	}, []);
+
+	// State management
 	const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
 	const [isLocating, setIsLocating] = useState(false);
 	const [locationError, setLocationError] = useState<string | null>(null);
@@ -155,18 +95,17 @@ const LocationMap: React.FC<LocationMapProps> = ({
 	const [controlsExpanded, setControlsExpanded] = useState(false);
 	const [showLabels, setShowLabels] = useState(true);
 	const [drawerExpanded, setDrawerExpanded] = useState(drawerInitiallyExpanded);
-	const [leafletLoaded, setLeafletLoaded] = useState(false);
 
-	// Refs and other state/handlers (abbreviated)
+	// Refs
 	const mapRef = useRef<HTMLDivElement>(null);
 	const mapContainerRef = useRef<HTMLDivElement>(null);
-	const mapInstanceRef = useRef<L.Map | null>(null);
-	const markerLayerRef = useRef<L.LayerGroup | null>(null);
-	const markersRef = useRef<Map<string, L.Marker>>(new Map());
-	const userMarkerRef = useRef<L.CircleMarker | null>(null);
-	const userCircleRef = useRef<L.CircleMarker | null>(null);
+	const mapInstanceRef = useRef<LeafletMap | null>(null);
+	const markerLayerRef = useRef<LayerGroup | null>(null);
+	const markersRef = useRef<Map<string, Marker>>(new Map());
+	const userMarkerRef = useRef<any>(null); // CircleMarker
+	const userCircleRef = useRef<any>(null); // CircleMarker
 	const pulseAnimationRef = useRef<number | null>(null);
-	const initialPositionRef = useRef<Coordinates>(position as Coordinates);
+	const initialPositionRef = useRef<Coordinates>(position);
 
 	// Control flags
 	const isUserControlledRef = useRef(false);
@@ -174,8 +113,75 @@ const LocationMap: React.FC<LocationMapProps> = ({
 	const lastInteractionTimeRef = useRef(0);
 	const initialPositionAppliedRef = useRef(false);
 
+	// Memoize position classes for toggle button
+	const togglePositionClasses = useMemo(() => {
+		switch (togglePosition) {
+			case "top-left":
+				return "top-3 left-3";
+			case "top-right":
+				return "top-3 right-3";
+			case "bottom-left":
+				return "bottom-20 left-3"; // Leave space for drawer
+			case "bottom-right":
+				return "bottom-20 right-3"; // Leave space for drawer
+			default:
+				return "top-3 left-3";
+		}
+	}, [togglePosition]);
+
+	// Memoize panel position classes
+	const panelPositionClasses = useMemo(() => {
+		switch (togglePosition) {
+			case "top-left":
+				return "top-16 left-3";
+			case "top-right":
+				return "top-16 right-3";
+			case "bottom-left":
+				return "bottom-32 left-3"; // Position above toggle
+			case "bottom-right":
+				return "bottom-32 right-3"; // Position above toggle
+			default:
+				return "top-16 left-3";
+		}
+	}, [togglePosition]);
+
+	// Memoize transform classes for slide animation
+	const transformClasses = useMemo(() => {
+		if (controlsExpanded) return "opacity-100 translate-x-0";
+
+		switch (togglePosition) {
+			case "top-left":
+			case "bottom-left":
+				return "opacity-0 -translate-x-full pointer-events-none";
+			case "top-right":
+			case "bottom-right":
+				return "opacity-0 translate-x-full pointer-events-none";
+			default:
+				return "opacity-0 -translate-x-full pointer-events-none";
+		}
+	}, [togglePosition, controlsExpanded]);
+
+	// Memoize the appropriate chevron icon
+	const chevronIcon = useMemo(() => {
+		if (togglePosition.includes("right")) {
+			return controlsExpanded ? (
+				<ChevronRight className="h-5 w-5" />
+			) : (
+				<ChevronLeft className="h-5 w-5" />
+			);
+		}
+		return controlsExpanded ? (
+			<ChevronLeft className="h-5 w-5" />
+		) : (
+			<ChevronRight className="h-5 w-5" />
+		);
+	}, [togglePosition, controlsExpanded]);
+
 	// Fix Leaflet icon path issues in Next.js
 	useEffect(() => {
+		if (!L) return;
+
+		// Fix Leaflet icon paths
 		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 		// biome-ignore lint/performance/noDelete: <explanation>
 		delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -184,7 +190,7 @@ const LocationMap: React.FC<LocationMapProps> = ({
 			iconUrl: "/leaflet/marker-icon.png",
 			shadowUrl: "/leaflet/marker-shadow.png",
 		});
-	}, []);
+	}, [L]);
 
 	// Handle fullscreen change events
 	useEffect(() => {
@@ -215,21 +221,6 @@ const LocationMap: React.FC<LocationMapProps> = ({
 	const toggleControls = useCallback(() => {
 		setControlsExpanded((prev) => !prev);
 	}, []);
-
-	// Get position classes for toggle button
-	const togglePositionClasses = getTogglePositionClasses(togglePosition);
-
-	// Get position classes for panel
-	const panelPositionClasses = getPanelPositionClasses(togglePosition);
-
-	// Get transform classes for animation
-	const transformClasses = getTransformClasses(
-		togglePosition,
-		controlsExpanded,
-	);
-
-	// Get the appropriate chevron icon
-	const chevronIcon = getChevronIcon(togglePosition, controlsExpanded);
 
 	// Update drawer state when prop changes
 	useEffect(() => {
@@ -328,75 +319,78 @@ const LocationMap: React.FC<LocationMapProps> = ({
 	}, [onZoomChange]);
 
 	// Create a stable pulse effect for user location
-	const createPulseEffect = useCallback((map: L.Map, center: Coordinates) => {
-		// Cancel any existing animation
-		if (pulseAnimationRef.current) {
-			cancelAnimationFrame(pulseAnimationRef.current);
-			pulseAnimationRef.current = null;
-		}
-
-		// Minimum and maximum radius for the pulse effect
-		const minRadius = 8;
-		const maxRadius = 20;
-		const animationDuration = 1500; // 1.5 seconds for full cycle
-
-		// Create the pulsing circle (no animation yet, just the base)
-		if (userCircleRef.current) {
-			map.removeLayer(userCircleRef.current);
-		}
-
-		userCircleRef.current = L.circleMarker(center, {
-			radius: minRadius,
-			fillColor: "hsl(var(--primary))",
-			fillOpacity: 0.4,
-			stroke: true,
-			color: "hsl(var(--primary))",
-			weight: 1,
-			opacity: 0.5,
-		}).addTo(map);
-
-		// Animation variables
-		let startTime: number | null = null;
-
-		// Animation function
-		const animate = (timestamp: number) => {
-			if (!startTime) startTime = timestamp;
-
-			// Calculate progress (0 to 1)
-			const elapsed = timestamp - startTime;
-			const progress = (elapsed % animationDuration) / animationDuration;
-
-			// Create a smooth pulse using sine function (oscillates between 0 and 1)
-			const pulse = Math.abs(Math.sin(progress * Math.PI));
-
-			// Calculate current radius based on pulse
-			const radius = minRadius + pulse * (maxRadius - minRadius);
-
-			// Calculate opacity (decrease as radius increases)
-			const opacity = 0.6 - pulse * 0.4; // Fades from 0.6 to 0.2
-
-			// Update circle properties if it exists
-			if (userCircleRef.current) {
-				userCircleRef.current.setRadius(radius);
-				userCircleRef.current.setStyle({
-					fillOpacity: opacity,
-				});
-			}
-
-			// Continue animation loop
-			pulseAnimationRef.current = requestAnimationFrame(animate);
-		};
-
-		// Start animation
-		pulseAnimationRef.current = requestAnimationFrame(animate);
-
-		// Return a cleanup function
-		return () => {
+	const createPulseEffect = useCallback(
+		(map: L.Map, center: Coordinates) => {
+			// Cancel any existing animation
 			if (pulseAnimationRef.current) {
 				cancelAnimationFrame(pulseAnimationRef.current);
+				pulseAnimationRef.current = null;
 			}
-		};
-	}, []);
+
+			// Minimum and maximum radius for the pulse effect
+			const minRadius = 8;
+			const maxRadius = 20;
+			const animationDuration = 1500; // 1.5 seconds for full cycle
+
+			// Create the pulsing circle (no animation yet, just the base)
+			if (userCircleRef.current) {
+				map.removeLayer(userCircleRef.current);
+			}
+
+			userCircleRef.current = L.circleMarker(center, {
+				radius: minRadius,
+				fillColor: "hsl(var(--primary))",
+				fillOpacity: 0.4,
+				stroke: true,
+				color: "hsl(var(--primary))",
+				weight: 1,
+				opacity: 0.5,
+			}).addTo(map);
+
+			// Animation variables
+			let startTime: number | null = null;
+
+			// Animation function
+			const animate = (timestamp: number) => {
+				if (!startTime) startTime = timestamp;
+
+				// Calculate progress (0 to 1)
+				const elapsed = timestamp - startTime;
+				const progress = (elapsed % animationDuration) / animationDuration;
+
+				// Create a smooth pulse using sine function (oscillates between 0 and 1)
+				const pulse = Math.abs(Math.sin(progress * Math.PI));
+
+				// Calculate current radius based on pulse
+				const radius = minRadius + pulse * (maxRadius - minRadius);
+
+				// Calculate opacity (decrease as radius increases)
+				const opacity = 0.6 - pulse * 0.4; // Fades from 0.6 to 0.2
+
+				// Update circle properties if it exists
+				if (userCircleRef.current) {
+					userCircleRef.current.setRadius(radius);
+					userCircleRef.current.setStyle({
+						fillOpacity: opacity,
+					});
+				}
+
+				// Continue animation loop
+				pulseAnimationRef.current = requestAnimationFrame(animate);
+			};
+
+			// Start animation
+			pulseAnimationRef.current = requestAnimationFrame(animate);
+
+			// Return a cleanup function
+			return () => {
+				if (pulseAnimationRef.current) {
+					cancelAnimationFrame(pulseAnimationRef.current);
+				}
+			};
+		},
+		[L],
+	);
 
 	// Add/update user location marker
 	const updateUserLocationMarker = useCallback(
@@ -431,29 +425,30 @@ const LocationMap: React.FC<LocationMapProps> = ({
 			// Create stable pulse animation
 			createPulseEffect(map, coords);
 		},
-		[createPulseEffect],
+		[createPulseEffect, L],
 	);
 
 	// Create custom icon based on status
-	const createCustomIcon = useCallback((status?: string) => {
-		// biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
-		let color;
-		switch (status) {
-			case "completed":
-				color = "hsl(var(--secondary))"; // Green
-				break;
-			case "in_progress":
-				color = "hsl(39, 100%, 50%)"; // Amber
-				break;
-			case "rejected":
-				color = "hsl(var(--destructive))"; // Red
-				break;
-			default:
-				color = "hsl(var(--primary))"; // Default blue
-		}
+	const createCustomIcon = useCallback(
+		(status?: string) => {
+			// biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
+			let color;
+			switch (status) {
+				case "completed":
+					color = "hsl(var(--secondary))"; // Green
+					break;
+				case "in_progress":
+					color = "hsl(39, 100%, 50%)"; // Amber
+					break;
+				case "rejected":
+					color = "hsl(var(--destructive))"; // Red
+					break;
+				default:
+					color = "hsl(var(--primary))"; // Default blue
+			}
 
-		return L.divIcon({
-			html: `
+			return L.divIcon({
+				html: `
         <div class="flex items-center justify-center w-8 h-8">
           <div class="absolute flex items-center justify-center">
             <div class="h-5 w-5 rounded-full" style="background-color: ${color}"></div>
@@ -461,11 +456,13 @@ const LocationMap: React.FC<LocationMapProps> = ({
           </div>
         </div>
       `,
-			className: "custom-marker",
-			iconSize: [40, 40],
-			iconAnchor: [20, 20],
-		});
-	}, []);
+				className: "custom-marker",
+				iconSize: [40, 40],
+				iconAnchor: [20, 20],
+			});
+		},
+		[L],
+	);
 
 	// Handle zoom change
 	const handleZoomChange = useCallback(
@@ -604,6 +601,7 @@ const LocationMap: React.FC<LocationMapProps> = ({
 			flyToMarker,
 			userLocation,
 			updateUserLocationMarker,
+			L,
 		],
 	);
 
@@ -747,6 +745,7 @@ const LocationMap: React.FC<LocationMapProps> = ({
 		updateMarkers,
 		onLoad,
 		onZoomChange,
+		L,
 	]);
 
 	// Map control button component with label support
@@ -979,4 +978,6 @@ const LocationMap: React.FC<LocationMapProps> = ({
 };
 
 // Export with dynamic import to avoid SSR issues
-export default dynamic(() => Promise.resolve(LocationMap), { ssr: false });
+export default dynamic(() => Promise.resolve(LocationMapComponent), {
+	ssr: false,
+});
