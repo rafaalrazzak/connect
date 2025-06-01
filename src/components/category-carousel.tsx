@@ -1,74 +1,53 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+	Carousel,
+	CarouselContent,
+	CarouselItem,
+} from "@/components/ui/carousel";
 import { useReportDrawer } from "@/contexts/report-drawer-context";
 import { categories } from "@/lib/mock-data";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useRef } from "react";
+import { useState } from "react";
+import { CardIcon } from "./ui/card-icon";
 
 export default function CategoryCarousel() {
-	const scrollContainerRef = useRef<HTMLDivElement>(null);
 	const { openDrawer } = useReportDrawer();
+	const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
-	const scroll = (direction: "left" | "right") => {
-		if (scrollContainerRef.current) {
-			const { current } = scrollContainerRef;
-			const scrollAmount = direction === "left" ? -200 : 200;
-			current.scrollBy({ left: scrollAmount, behavior: "smooth" });
-		}
+	const handleCategoryClick = (categoryId: string) => {
+		setActiveCategory(categoryId);
+		openDrawer({
+			prefillData: { category: categoryId },
+		});
 	};
 
 	return (
-		<div className="relative">
-			<div
-				ref={scrollContainerRef}
-				className="flex overflow-x-auto gap-4 pb-2 scrollbar-hide snap-x snap-mandatory"
-				style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-			>
+		<Carousel
+			opts={{
+				align: "start",
+				loop: false,
+				dragFree: true,
+			}}
+			className="w-full"
+		>
+			<CarouselContent className="-ml-4">
 				{categories.map((category) => (
-					<div
+					<CarouselItem
 						key={category.id}
-						className="snap-start flex-shrink-0 first:pl-0 last:pr-0"
-						style={{ width: "120px" }}
+						className="pl-4 basis-1/2 md:basis-1/3"
 					>
-						<Card
-							className="w-full h-full hover:shadow-md transition-all duration-300 border-muted/80 cursor-pointer"
-							onClick={() =>
-								openDrawer({
-									prefillData: { category: category.id },
-								})
-							}
-						>
-							<CardContent className="p-4 flex flex-col items-center justify-center text-center h-full">
-								<div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center mb-3">
-									<category.icon className="h-6 w-6 text-primary" />
-								</div>
-								<span className="text-sm font-medium">{category.name}</span>
-							</CardContent>
-						</Card>
-					</div>
+						<div className="p-1 size-full">
+							<CardIcon
+								iconName={category.iconName}
+								label={category.name}
+								onClick={() => handleCategoryClick(category.id)}
+								active={activeCategory === category.id}
+								variant="outline"
+							/>
+						</div>
+					</CarouselItem>
 				))}
-			</div>
-
-			{/* Scroll buttons */}
-			<Button
-				variant="outline"
-				size="icon"
-				className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 bg-background shadow-md rounded-full h-8 w-8 hidden md:flex border-muted/80"
-				onClick={() => scroll("left")}
-			>
-				<ChevronLeft className="h-4 w-4" />
-			</Button>
-
-			<Button
-				variant="outline"
-				size="icon"
-				className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 bg-background shadow-md rounded-full h-8 w-8 hidden md:flex border-muted/80"
-				onClick={() => scroll("right")}
-			>
-				<ChevronRight className="h-4 w-4" />
-			</Button>
-		</div>
+			</CarouselContent>
+		</Carousel>
 	);
 }

@@ -10,6 +10,11 @@ const nextConfig = {
 		unoptimized: true,
 	},
 	allowedDevOrigins: ["*.kita.blue", "localhost"],
+	experimental: {
+		serverActions: {
+			bodySizeLimit: "2mb",
+		},
+	},
 };
 
 export default nextConfig;

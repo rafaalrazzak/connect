@@ -12,7 +12,7 @@ interface FormState {
 	isPending: boolean;
 	error: string | null;
 	showConfirmDialog: boolean;
-	selectedCategory: Pick<Category, "id" | "name"> | null;
+	selectedCategory: Category | null;
 	previewImages: PreviewImage[];
 }
 
@@ -36,7 +36,7 @@ interface ServerActions {
 // Props for the hook
 interface UseReportFormProps {
 	defaultData: ReportFormData;
-	onSubmitSuccess?: () => void;
+	onSubmitSuccess?: (data: { reportId: string }) => void;
 	serverActions: ServerActions;
 }
 
@@ -122,12 +122,9 @@ export function useReportForm({
 	/**
 	 * Set selected category
 	 */
-	const setSelectedCategory = useCallback(
-		(category: Pick<Category, "id" | "name"> | null) => {
-			setFormState((prev) => ({ ...prev, selectedCategory: category }));
-		},
-		[],
-	);
+	const setSelectedCategory = useCallback((category: Category | null) => {
+		setFormState((prev) => ({ ...prev, selectedCategory: category }));
+	}, []);
 
 	/**
 	 * Set error message
@@ -223,6 +220,7 @@ export function useReportForm({
 				}
 
 				// Server-side validation
+
 				const validationResult = await serverActions.validateStepData({
 					stepNumber: step,
 					formData: form,
@@ -464,7 +462,10 @@ export function useReportForm({
 				}
 
 				// First, upload images
-				const imageFiles = previewImages.map((img) => img.file);
+				const imageFiles = previewImages
+					.filter((img) => img.file) // Make sure we only have valid files
+					.map((img) => img.file as File);
+
 				const uploadResult = await serverActions.uploadImages(imageFiles);
 
 				if (!uploadResult.success) {
@@ -489,7 +490,11 @@ export function useReportForm({
 				if (result.success) {
 					toast.success("Laporan berhasil dikirim!");
 					resetForm();
-					onSubmitSuccess?.();
+
+					// Pass the actual report ID to the success callback
+					onSubmitSuccess?.({
+						reportId: result.reportId || `TEMP-${Date.now()}`,
+					});
 				} else {
 					setFormState((prev) => ({
 						...prev,

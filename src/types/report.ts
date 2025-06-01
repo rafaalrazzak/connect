@@ -1,3 +1,4 @@
+import type { IconName } from "@/components/icons";
 import type { LucideIcon } from "lucide-react";
 
 export type ReportStatus = "pending" | "in_progress" | "completed" | "rejected";
@@ -20,7 +21,7 @@ export interface Category {
 	id: string;
 	name: string;
 	description?: string;
-	icon: LucideIcon | string;
+	iconName: IconName;
 }
 
 export interface ReportFormData {
@@ -43,7 +44,7 @@ export interface Report {
 	title: string;
 	description: string;
 	location: string;
-	coordinates?: {
+	coordinates: {
 		latitude: number;
 		longitude: number;
 	};

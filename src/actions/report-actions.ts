@@ -1,5 +1,6 @@
 "use server";
 
+import { reports } from "@/lib/mock-data";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
@@ -192,7 +193,7 @@ export async function submitReport(params: unknown) {
 
 		return {
 			success: true,
-			reportId: `report-${Date.now()}`, // Simulate returned ID
+			reportId: reports[Math.floor(Math.random() * reports.length)],
 		};
 	} catch (error) {
 		console.error("Report submission error:", error);

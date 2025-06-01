@@ -1,5 +1,6 @@
 "use client";
 
+import { Slot } from "@radix-ui/react-slot";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, memo, useCallback, useEffect } from "react";
 
@@ -160,10 +161,19 @@ const DrawerContentWrapper = memo(function DrawerContentWrapper({
 		},
 	} = useReportForm({
 		defaultData: DEFAULT_FORM_DATA,
-		onSubmitSuccess: () => {
+		onSubmitSuccess: ({ reportId }) => {
+			const reportType = selectedCategory?.name || "Laporan";
+
+			// Call any provided success callback
 			onSuccess?.();
+
+			// Close the drawer
 			onClose();
-			router.push("/report/success");
+
+			// Navigate to success page with the actual report ID and type
+			router.push(
+				`/report/success?id=${reportId}&type=${encodeURIComponent(reportType)}`,
+			);
 		},
 		serverActions: {
 			validateStepData,
@@ -514,7 +524,7 @@ const StepContent = memo(function StepContent({
 	formData: ReportFormData;
 	selectedCategory: Category | null;
 	previewImages: PreviewImage[];
-	setSelectedCategory: (category: Category) => void;
+	setSelectedCategory: (category: Category | null) => void;
 	handleInputChange: (
 		e: React.ChangeEvent<
 			HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -580,29 +590,40 @@ export function ReportButton({
 	className,
 	onClick,
 	prefillData,
+	asChild = false,
 }: {
 	children?: React.ReactNode;
 	className?: string;
 	onClick?: () => void;
 	prefillData?: Partial<ReportFormData>;
+	asChild?: boolean;
 }) {
 	const { openDrawer } = useReportDrawer();
 
+	const handleClick = () => {
+		openDrawer({
+			prefillData,
+		});
+		onClick?.();
+	};
+
+	const defaultContent = (
+		<>
+			<Plus className="mr-2 h-4 w-4" /> Buat Laporan
+		</>
+	);
+
+	if (asChild) {
+		return (
+			<button type="button" onClick={handleClick} className={className}>
+				{children || defaultContent}
+			</button>
+		);
+	}
+
 	return (
-		<Button
-			onClick={() => {
-				openDrawer({
-					prefillData,
-				});
-				onClick?.();
-			}}
-			className={className}
-		>
-			{children || (
-				<>
-					<Plus className="mr-2 h-4 w-4" /> Buat Laporan
-				</>
-			)}
+		<Button onClick={handleClick} className={className}>
+			{children || defaultContent}
 		</Button>
 	);
 }
