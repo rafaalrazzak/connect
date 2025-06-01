@@ -225,7 +225,7 @@ export default function AdminDashboard() {
 								<div
 									className="w-3 h-3 rounded-full mr-1"
 									style={{ backgroundColor: status.color }}
-								></div>
+								/>
 								<span className="text-xs">{status.name}</span>
 							</div>
 						))}

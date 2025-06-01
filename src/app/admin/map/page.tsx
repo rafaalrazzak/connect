@@ -162,19 +162,19 @@ export default function AdminMap() {
 							<h3 className="text-sm font-medium mb-2">Map Legend</h3>
 							<div className="space-y-2">
 								<div className="flex items-center">
-									<div className="w-3 h-3 rounded-full bg-amber-500 mr-2"></div>
+									<div className="w-3 h-3 rounded-full bg-amber-500 mr-2" />
 									<span className="text-sm">Pending</span>
 								</div>
 								<div className="flex items-center">
-									<div className="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
+									<div className="w-3 h-3 rounded-full bg-blue-500 mr-2" />
 									<span className="text-sm">In Progress</span>
 								</div>
 								<div className="flex items-center">
-									<div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
+									<div className="w-3 h-3 rounded-full bg-green-500 mr-2" />
 									<span className="text-sm">Completed</span>
 								</div>
 								<div className="flex items-center">
-									<div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
+									<div className="w-3 h-3 rounded-full bg-red-500 mr-2" />
 									<span className="text-sm">Rejected</span>
 								</div>
 							</div>
@@ -211,7 +211,7 @@ export default function AdminMap() {
 										<div
 											className="w-4 h-4 rounded-full border-2 border-white shadow-md transition-all group-hover:w-5 group-hover:h-5"
 											style={{ backgroundColor: getStatusColor(report.status) }}
-										></div>
+										/>
 										<div className="absolute opacity-0 group-hover:opacity-100 bottom-full left-1/2 transform -translate-x-1/2 bg-white p-2 rounded shadow-lg min-w-[200px] z-10 transition-opacity">
 											<div className="font-medium">{report.title}</div>
 											<div className="text-sm text-muted-foreground">

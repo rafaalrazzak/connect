@@ -49,7 +49,7 @@ export async function validateStepData(params: unknown) {
 				}
 				break;
 
-			case 2:
+			case 2: {
 				// Validate form details
 				const title = formData.title as string;
 				const description = formData.description as string;
@@ -79,6 +79,7 @@ export async function validateStepData(params: unknown) {
 					};
 				}
 				break;
+			}
 
 			case 3:
 				// Validate images
@@ -87,13 +88,14 @@ export async function validateStepData(params: unknown) {
 				}
 				break;
 
-			case 4:
+			case 4: {
 				// Validate location
 				const location = formData.location as string;
 				if (!location) {
 					return { success: false, error: "Lokasi tidak boleh kosong" };
 				}
 				break;
+			}
 		}
 
 		// Validation passed

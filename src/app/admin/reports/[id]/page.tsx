@@ -270,7 +270,7 @@ export default function ReportDetail({ params }: { params: { id: string } }) {
 														style={{
 															height: `${((index + 1) / report.timeline.length) * 100}%`,
 														}}
-													></div>
+													/>
 												</div>
 												<div
 													className={`absolute left-[-5px] top-0 w-[12px] h-[12px] rounded-full ${
@@ -278,7 +278,7 @@ export default function ReportDetail({ params }: { params: { id: string } }) {
 															? "bg-primary shadow-md"
 															: "bg-muted"
 													}`}
-												></div>
+												/>
 												<div className="space-y-1 pb-6">
 													<div className="flex justify-between">
 														<p className="font-medium">{item.title}</p>

@@ -41,7 +41,6 @@ export const ReviewStep = memo(function ReviewStep({
 					className:
 						"bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-600/20 dark:bg-rose-950/30 dark:text-rose-400 dark:ring-rose-500/30",
 				};
-			case "medium":
 			default:
 				return {
 					label: "Prioritas Sedang",

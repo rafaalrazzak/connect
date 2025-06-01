@@ -444,7 +444,7 @@ export default function AdminSettings() {
 								<div className="border rounded-md">
 									<div className="p-3 flex items-center justify-between border-b">
 										<div className="flex items-center gap-2">
-											<div className="w-4 h-4 rounded-full bg-red-500"></div>
+											<div className="w-4 h-4 rounded-full bg-red-500" />
 											<span>Road Damage</span>
 										</div>
 										<Button variant="ghost" size="sm">
@@ -453,7 +453,7 @@ export default function AdminSettings() {
 									</div>
 									<div className="p-3 flex items-center justify-between border-b">
 										<div className="flex items-center gap-2">
-											<div className="w-4 h-4 rounded-full bg-yellow-500"></div>
+											<div className="w-4 h-4 rounded-full bg-yellow-500" />
 											<span>Street Lights</span>
 										</div>
 										<Button variant="ghost" size="sm">
@@ -462,7 +462,7 @@ export default function AdminSettings() {
 									</div>
 									<div className="p-3 flex items-center justify-between border-b">
 										<div className="flex items-center gap-2">
-											<div className="w-4 h-4 rounded-full bg-green-500"></div>
+											<div className="w-4 h-4 rounded-full bg-green-500" />
 											<span>Waste Issues</span>
 										</div>
 										<Button variant="ghost" size="sm">
@@ -471,7 +471,7 @@ export default function AdminSettings() {
 									</div>
 									<div className="p-3 flex items-center justify-between border-b">
 										<div className="flex items-center gap-2">
-											<div className="w-4 h-4 rounded-full bg-blue-500"></div>
+											<div className="w-4 h-4 rounded-full bg-blue-500" />
 											<span>Public Order</span>
 										</div>
 										<Button variant="ghost" size="sm">
@@ -480,7 +480,7 @@ export default function AdminSettings() {
 									</div>
 									<div className="p-3 flex items-center justify-between">
 										<div className="flex items-center gap-2">
-											<div className="w-4 h-4 rounded-full bg-purple-500"></div>
+											<div className="w-4 h-4 rounded-full bg-purple-500" />
 											<span>Public Facilities</span>
 										</div>
 										<Button variant="ghost" size="sm">

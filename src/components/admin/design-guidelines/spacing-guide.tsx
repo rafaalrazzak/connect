@@ -73,7 +73,7 @@ export default function SpacingGuide() {
 															? "32px"
 															: "48px",
 								}}
-							></div>
+							/>
 							<div>
 								<h3 className="font-medium text-sm">{item.name}</h3>
 								<p className="text-xs text-muted-foreground">{item.value}</p>
@@ -91,15 +91,15 @@ export default function SpacingGuide() {
 						<div className="p-2 bg-primary/10 rounded text-center text-sm">
 							Elemen 1
 						</div>
-						<div className="h-4 border-l border-dashed border-primary/40 ml-4"></div>
+						<div className="h-4 border-l border-dashed border-primary/40 ml-4" />
 						<div className="p-2 bg-primary/10 rounded text-center text-sm">
 							Elemen 2
 						</div>
-						<div className="h-8 border-l border-dashed border-primary/40 ml-4"></div>
+						<div className="h-8 border-l border-dashed border-primary/40 ml-4" />
 						<div className="p-2 bg-primary/10 rounded text-center text-sm">
 							Elemen 3
 						</div>
-						<div className="h-16 border-l border-dashed border-primary/40 ml-4"></div>
+						<div className="h-16 border-l border-dashed border-primary/40 ml-4" />
 						<div className="p-2 bg-primary/10 rounded text-center text-sm">
 							Elemen 4
 						</div>
