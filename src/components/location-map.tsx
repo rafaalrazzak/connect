@@ -930,7 +930,6 @@ const LocationMapComponent: React.FC<LocationMapProps> = ({
 				</div>
 			)}
 
-			{/* Bottom Drawer for Report Details - Google Maps Style */}
 			{bottomDrawer && (
 				<div
 					className={cn(
