@@ -4,183 +4,205 @@ import type { Report, ReportStatus } from "@/types/report";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-// Pagination constants
+// Constants
 const REPORTS_PER_PAGE = 5;
+const LOADING_DELAY = 500; // ms
+
+// Filter state type
+interface FilterState {
+	category: string;
+	status: ReportStatus | "all";
+	query: string;
+	sort: "newest" | "oldest" | "upvotes";
+	page: number;
+}
+
+// Default filter values
+const DEFAULT_FILTERS: Omit<FilterState, "page"> = {
+	category: "all",
+	status: "all",
+	query: "",
+	sort: "newest",
+};
 
 export function useReportFilters(allReports: Report[]) {
 	const searchParams = useSearchParams();
 	const router = useRouter();
+	const [isLoading, setIsLoading] = useState(true);
 
-	// Initial values from URL
-	const initialCategory = searchParams.get("category") || "all";
-	const initialStatus = (searchParams.get("status") || "all") as
-		| ReportStatus
-		| "all";
-	const initialQuery = searchParams.get("q") || "";
-	const initialSort = searchParams.get("sort") || "newest";
-	const initialPage = Number.parseInt(searchParams.get("page") || "1", 10);
+	// Parse URL params with fallbacks to defaults
+	const initialFilters = useMemo(
+		(): FilterState => ({
+			category: searchParams.get("category") || DEFAULT_FILTERS.category,
+			status:
+				(searchParams.get("status") as FilterState["status"]) ||
+				DEFAULT_FILTERS.status,
+			query: searchParams.get("q") || DEFAULT_FILTERS.query,
+			sort:
+				(searchParams.get("sort") as FilterState["sort"]) ||
+				DEFAULT_FILTERS.sort,
+			page: Math.max(
+				1,
+				Number.parseInt(searchParams.get("page") || "1", 10) || 1,
+			),
+		}),
+		[searchParams],
+	);
 
-	// State
-	const [searchQuery, setSearchQuery] = useState(initialQuery);
-	const [selectedCategory, setSelectedCategory] = useState(initialCategory);
-	const [selectedStatus, setSelectedStatus] = useState(initialStatus);
-	const [sortOrder, setSortOrder] = useState(initialSort);
-	const [currentPage, setCurrentPage] = useState(initialPage);
+	const [filters, setFilters] = useState<FilterState>(initialFilters);
 
-	// Update URL when filters or page change
-	const updateFilters = useCallback(
-		(
-			category: string,
-			status: ReportStatus | "all",
-			query: string,
-			sort: string,
-			page = 1,
-		) => {
+	// Simulate loading state (replace with real data fetching)
+	useEffect(() => {
+		const timer = setTimeout(() => setIsLoading(false), LOADING_DELAY);
+		return () => clearTimeout(timer);
+	}, []);
+
+	// Update URL with current filters
+	const syncUrl = useCallback(
+		(newFilters: FilterState) => {
 			const params = new URLSearchParams();
 
-			if (category !== "all") params.set("category", category);
-			if (status !== "all") params.set("status", status);
-			if (query) params.set("q", query);
-			if (sort !== "newest") params.set("sort", sort);
-			if (page > 1) params.set("page", page.toString());
+			// Only add non-default params to URL
+			for (const [key, value] of Object.entries(newFilters)) {
+				if (key === "page") {
+					if (value > 1) params.set(key, String(value));
+				} else if (key === "query") {
+					if (value) params.set("q", value);
+				} else if (
+					value !== DEFAULT_FILTERS[key as keyof typeof DEFAULT_FILTERS]
+				) {
+					params.set(key, String(value));
+				}
+			}
 
-			const newUrl = params.toString() ? `?${params.toString()}` : "";
-			router.push(`/reports${newUrl}`, { scroll: false });
+			const queryString = params.toString();
+			router.push(`/reports${queryString ? `?${queryString}` : ""}`, {
+				scroll: false,
+			});
 		},
 		[router],
 	);
 
-	// Apply filters and sort
-	const filteredReports = useMemo(() => {
-		let filtered = [...allReports];
+	// Update a single filter
+	const setFilter = useCallback(
+		<K extends keyof FilterState>(key: K, value: FilterState[K]) => {
+			setFilters((prev) => {
+				// Reset page when changing any filter except page itself
+				const shouldResetPage = key !== "page" && prev.page > 1;
 
-		// Filter by search query
-		if (searchQuery) {
-			const query = searchQuery.toLowerCase();
-			filtered = filtered.filter(
-				(report) =>
-					report.title.toLowerCase().includes(query) ||
-					report.description?.toLowerCase().includes(query) ||
-					report.location?.toLowerCase().includes(query),
-			);
-		}
+				const newFilters = {
+					...prev,
+					[key]: value,
+					...(shouldResetPage ? { page: 1 } : {}),
+				};
 
-		// Filter by category
-		if (selectedCategory !== "all") {
-			filtered = filtered.filter((report) => {
-				if (typeof report.category === "object" && report.category?.id) {
-					return report.category.id === selectedCategory;
-				}
-				return false;
+				syncUrl(newFilters);
+				return newFilters;
 			});
-		}
-
-		// Filter by status
-		if (selectedStatus !== "all") {
-			filtered = filtered.filter((report) => report.status === selectedStatus);
-		}
-
-		// Sort reports
-		filtered.sort((a, b) => {
-			if (sortOrder === "newest")
-				return new Date(b.date).getTime() - new Date(a.date).getTime();
-			if (sortOrder === "oldest")
-				return new Date(a.date).getTime() - new Date(b.date).getTime();
-			if (sortOrder === "upvotes") return (b.upvotes || 0) - (a.upvotes || 0);
-			return 0;
-		});
-
-		return filtered;
-	}, [allReports, searchQuery, selectedCategory, selectedStatus, sortOrder]);
-
-	// Calculate pagination
-	const totalPages = Math.max(
-		1,
-		Math.ceil(filteredReports.length / REPORTS_PER_PAGE),
-	);
-
-	// Ensure current page is valid
-	useEffect(() => {
-		if (currentPage > totalPages && totalPages > 0) {
-			setCurrentPage(1);
-			updateFilters(
-				selectedCategory,
-				selectedStatus,
-				searchQuery,
-				sortOrder,
-				1,
-			);
-		}
-	}, [
-		currentPage,
-		totalPages,
-		updateFilters,
-		selectedCategory,
-		selectedStatus,
-		searchQuery,
-		sortOrder,
-	]);
-
-	// Get paginated reports for current page
-	const paginatedReports = useMemo(() => {
-		const startIndex = (currentPage - 1) * REPORTS_PER_PAGE;
-		const endIndex = startIndex + REPORTS_PER_PAGE;
-		return filteredReports.slice(startIndex, endIndex);
-	}, [filteredReports, currentPage]);
-
-	// Navigation function with smooth scroll
-	const goToPage = useCallback(
-		(page: number) => {
-			const newPage = Math.max(1, Math.min(page, totalPages));
-			if (newPage === currentPage) return; // Avoid unnecessary updates
-
-			setCurrentPage(newPage);
-			updateFilters(
-				selectedCategory,
-				selectedStatus,
-				searchQuery,
-				sortOrder,
-				newPage,
-			);
-
-			// Smooth scroll to top of results
-			window.scrollTo({ top: 0, behavior: "smooth" });
 		},
-		[
-			totalPages,
-			currentPage,
-			selectedCategory,
-			selectedStatus,
-			searchQuery,
-			sortOrder,
-			updateFilters,
-		],
+		[syncUrl],
 	);
 
+	// Reset all filters to defaults
 	const resetFilters = useCallback(() => {
-		setSelectedCategory("all");
-		setSelectedStatus("all");
-		setSearchQuery("");
-		setSortOrder("newest");
-		setCurrentPage(1);
-		updateFilters("all", "all", "", "newest", 1);
-	}, [updateFilters]);
+		const defaultState = { ...DEFAULT_FILTERS, page: 1 };
+		setFilters(defaultState);
+		syncUrl(defaultState);
+	}, [syncUrl]);
+
+	// Apply filters to reports
+	const filteredReports = useMemo(() => {
+		if (!allReports?.length) return [];
+
+		return allReports
+			.filter((report) => {
+				// Apply all filters
+				if (filters.query) {
+					const query = filters.query.toLowerCase();
+					if (
+						!(
+							report.title.toLowerCase().includes(query) ||
+							report.description?.toLowerCase().includes(query) ||
+							report.location?.toLowerCase().includes(query)
+						)
+					) {
+						return false;
+					}
+				}
+
+				if (
+					filters.category !== "all" &&
+					(!report.category ||
+						typeof report.category !== "object" ||
+						report.category.id !== filters.category)
+				) {
+					return false;
+				}
+
+				if (filters.status !== "all" && report.status !== filters.status) {
+					return false;
+				}
+
+				return true;
+			})
+			.sort((a, b) => {
+				// Sort based on selected order
+				switch (filters.sort) {
+					case "newest":
+						return new Date(b.date).getTime() - new Date(a.date).getTime();
+					case "oldest":
+						return new Date(a.date).getTime() - new Date(b.date).getTime();
+					case "upvotes":
+						return (b.upvotes || 0) - (a.upvotes || 0);
+					default:
+						return 0;
+				}
+			});
+	}, [allReports, filters]);
+
+	// Calculate pagination values
+	const totalResults = filteredReports.length;
+	const totalPages = Math.max(1, Math.ceil(totalResults / REPORTS_PER_PAGE));
+
+	// Ensure page is valid
+	useEffect(() => {
+		if (filters.page > totalPages && totalPages > 0) {
+			setFilter("page", 1);
+		}
+	}, [filters.page, totalPages, setFilter]);
+
+	// Get current page of reports
+	const paginatedReports = useMemo(() => {
+		const start = (filters.page - 1) * REPORTS_PER_PAGE;
+		return filteredReports.slice(start, start + REPORTS_PER_PAGE);
+	}, [filteredReports, filters.page]);
+
+	// Page navigation with smooth scrolling
+	const goToPage = useCallback(
+		(newPage: number) => {
+			const validPage = Math.max(1, Math.min(newPage, totalPages));
+			if (validPage === filters.page) return;
+
+			setFilter("page", validPage);
+
+			// Smooth scroll to top
+			requestAnimationFrame(() => {
+				window.scrollTo({ top: 0, behavior: "smooth" });
+			});
+		},
+		[filters.page, totalPages, setFilter],
+	);
 
 	return {
-		searchQuery,
-		setSearchQuery,
-		selectedCategory,
-		setSelectedCategory,
-		selectedStatus,
-		setSelectedStatus,
-		sortOrder,
-		setSortOrder,
+		filters,
+		setFilter,
+		resetFilters,
 		filteredReports,
 		paginatedReports,
-		currentPage,
+		totalResults,
+		currentPage: filters.page,
 		totalPages,
-		updateFilters,
 		goToPage,
-		resetFilters,
+		isLoading,
 	};
 }

@@ -2,83 +2,99 @@
 
 import { ChevronLeft, List, Map as MapIcon } from "lucide-react";
 import Link from "next/link";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 
-import { EmptyState } from "@/components/reports/empty-state";
-import { FilterSection } from "@/components/reports/filter-section";
-import { MapView } from "@/components/reports/map-view";
-import { Pagination } from "@/components/reports/pagination";
-import { ReportsList } from "@/components/reports/reports-list";
-import { ResultsInfo } from "@/components/reports/results-info";
-import { SearchBar } from "@/components/reports/search-bar";
-// Components
+// UI Components
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// Hooks
-import { useReportFilters } from "@/hooks/use-report-filters";
+// Report Components
+import { EmptyState } from "@/components/reports/empty-state";
+import { FilterSection } from "@/components/reports/filter-section";
+import { LoadingState } from "@/components/reports/loading-state";
+import { MapView } from "@/components/reports/map-view";
+import { Pagination } from "@/components/reports/pagination";
+import { ReportsList } from "@/components/reports/reports-list";
+import { SearchBar } from "@/components/reports/search-bar";
 
-// Data
+// Hooks & Data
+import { useReportFilters } from "@/hooks/use-report-filters";
 import { reports } from "@/lib/mock-data";
 
+type ViewMode = "list" | "map";
+
 function ReportContent() {
-	const [isLoading, setIsLoading] = useState(true);
-	const [viewMode, setViewMode] = useState<"list" | "map">("list");
+	const [viewMode, setViewMode] = useState<ViewMode>("list");
 
 	const {
-		searchQuery,
-		setSearchQuery,
-		selectedCategory,
-		setSelectedCategory,
-		selectedStatus,
-		setSelectedStatus,
-		sortOrder,
-		setSortOrder,
+		filters,
+		setFilter,
+		resetFilters,
 		filteredReports,
 		paginatedReports,
+		totalResults,
 		currentPage,
 		totalPages,
-		updateFilters,
 		goToPage,
-		resetFilters,
+		isLoading,
 	} = useReportFilters(reports);
 
-	// Simulate data loading
-	useEffect(() => {
-		const loadReports = async () => {
-			await new Promise((resolve) => setTimeout(resolve, 800));
-			setIsLoading(false);
-		};
-
-		loadReports();
-	}, []);
+	// Derive UI states
+	const hasReports = filteredReports.length > 0;
+	const showResults = !isLoading && hasReports;
 
 	return (
-		<div className="max-w-screen-lg mx-auto px-4 py-6 pb-20">
-			{/* Header with back button and title */}
-			<div className="flex items-center gap-3 mb-6">
-				<Button
-					variant="ghost"
-					size="icon"
-					asChild
-					className="rounded-full h-9 w-9 hover:bg-muted/60"
-				>
-					<Link href="/" aria-label="Back to home">
-						<ChevronLeft className="h-5 w-5" />
-					</Link>
-				</Button>
+		<div className="max-w-screen-lg flex flex-col mx-auto px-4 sm:px-6 py-6 pb-20 gap-4">
+			{/* Header */}
+			<header className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
+				<div className="flex items-center gap-3 flex-1">
+					<Button
+						variant="ghost"
+						size="icon"
+						asChild
+						className="rounded-full h-9 w-9 hover:bg-muted/60 flex-shrink-0"
+					>
+						<Link href="/" aria-label="Kembali ke beranda">
+							<ChevronLeft className="h-5 w-5" />
+						</Link>
+					</Button>
 
-				<div className="flex-1">
-					<h1 className="text-2xl font-bold tracking-tight">Semua Laporan</h1>
-					<p className="text-muted-foreground text-sm">
-						Lihat dan cari laporan dari seluruh warga
-					</p>
+					<div>
+						<h1 className="text-xl sm:text-2xl font-bold tracking-tight">
+							Semua Laporan
+						</h1>
+						<p className="text-muted-foreground text-sm">
+							Lihat dan cari laporan dari seluruh warga
+						</p>
+					</div>
+				</div>
+			</header>
+
+			<div className="flex flex-col gap-4">
+				{/* Search and filters */}
+				<div className="flex items-center gap-2">
+					<SearchBar
+						query={filters.query}
+						onQueryChange={(value) => setFilter("query", value)}
+					/>
+
+					<FilterSection
+						category={filters.category}
+						status={filters.status}
+						sort={filters.sort}
+						onCategoryChange={(value) => setFilter("category", value)}
+						onStatusChange={(value) => setFilter("status", value)}
+						onSortChange={(value) =>
+							setFilter("sort", value as "newest" | "oldest" | "upvotes")
+						}
+						onReset={resetFilters}
+						searchQuery={filters.query}
+					/>
 				</div>
 
 				<Tabs
 					value={viewMode}
-					onValueChange={(v) => setViewMode(v as "list" | "map")}
-					className="w-auto"
+					onValueChange={(value) => setViewMode(value as ViewMode)}
 				>
 					<TabsList className="grid grid-cols-2">
 						<TabsTrigger value="list" className="px-3 gap-1.5">
@@ -93,62 +109,41 @@ function ReportContent() {
 				</Tabs>
 			</div>
 
-			<div className="space-y-5 mb-6">
-				<SearchBar
-					searchQuery={searchQuery}
-					setSearchQuery={setSearchQuery}
-					onSubmit={(query) =>
-						updateFilters(selectedCategory, selectedStatus, query, sortOrder)
-					}
-				/>
+			{/* Content area */}
+			<div className="space-y-4">
+				{isLoading && <LoadingState />}
 
-				<FilterSection
-					selectedCategory={selectedCategory}
-					setSelectedCategory={setSelectedCategory}
-					selectedStatus={selectedStatus}
-					setSelectedStatus={setSelectedStatus}
-					sortOrder={sortOrder}
-					setSortOrder={setSortOrder}
-					updateFilters={updateFilters}
-					resetFilters={resetFilters}
-					searchQuery={searchQuery}
-				/>
-			</div>
+				{!isLoading && !hasReports && (
+					<EmptyState onResetFilters={resetFilters} />
+				)}
 
-			{!isLoading && (
-				<ResultsInfo
-					filteredCount={filteredReports.length}
-					currentPage={currentPage}
-					reportsPerPage={5}
-					totalPages={totalPages}
-				/>
-			)}
-
-			{isLoading ? (
-				<ReportsList.Skeleton />
-			) : viewMode === "list" ? (
-				filteredReports.length > 0 ? (
+				{showResults && viewMode === "list" && (
 					<>
 						<ReportsList reports={paginatedReports} page={currentPage} />
-						<Pagination
-							currentPage={currentPage}
-							totalPages={totalPages}
-							onPageChange={goToPage}
-						/>
+						<div className="mt-5">
+							<Pagination
+								currentPage={currentPage}
+								totalPages={totalPages}
+								totalItems={totalResults}
+								onPageChange={goToPage}
+								itemName="laporan"
+								compact
+							/>
+						</div>
 					</>
-				) : (
-					<EmptyState onResetFilters={resetFilters} />
-				)
-			) : (
-				<MapView />
-			)}
+				)}
+
+				{showResults && viewMode === "map" && (
+					<MapView reports={filteredReports} />
+				)}
+			</div>
 		</div>
 	);
 }
 
 export default function ReportsPage() {
 	return (
-		<Suspense>
+		<Suspense fallback={<LoadingState />}>
 			<ReportContent />
 		</Suspense>
 	);

@@ -1,62 +1,80 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
+import { useDebounce } from "@/hooks/use-debounce";
 import { Search, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface SearchBarProps {
-	searchQuery: string;
-	setSearchQuery: (query: string) => void;
-	onSubmit: (query: string) => void;
+	query?: string;
+	onQueryChange: (query: string) => void;
+	onSubmit?: (query: string) => void;
+	placeholder?: string;
+	debounceMs?: number;
 }
 
 export function SearchBar({
-	searchQuery,
-	setSearchQuery,
+	query = "",
+	onQueryChange,
 	onSubmit,
+	placeholder = "Cari laporan, lokasi, atau masalah...",
+	debounceMs = 300,
 }: SearchBarProps) {
-	// Local state to avoid too many rerenders
-	const [inputValue, setInputValue] = useState(searchQuery);
+	// Local state for controlled input
+	const [inputValue, setInputValue] = useState(query);
 
-	// Update local state when prop changes
+	// Create a debounced version of onQueryChange
+	const debouncedOnQueryChange = useDebounce(onQueryChange, debounceMs);
+
+	// Track if the value was changed locally or externally
+	const isLocalChange = useRef(false);
+
+	// Input reference to focus after clearing
+	const inputRef = useRef<HTMLInputElement>(null);
+
+	// Handle input changes
+	const handleInputChange = useCallback(
+		(e: React.ChangeEvent<HTMLInputElement>) => {
+			const newValue = e.target.value;
+			setInputValue(newValue);
+			isLocalChange.current = true;
+			debouncedOnQueryChange(newValue);
+		},
+		[debouncedOnQueryChange],
+	);
+
+	// Sync with external query changes (only if not a local change)
 	useEffect(() => {
-		setInputValue(searchQuery);
-	}, [searchQuery]);
+		if (!isLocalChange.current && query !== inputValue) {
+			setInputValue(query);
+		}
+		isLocalChange.current = false;
+	}, [query, inputValue]);
 
-	const handleSubmit = (e: React.FormEvent) => {
-		e.preventDefault();
-		onSubmit(inputValue);
-	};
-
-	const handleClear = () => {
-		setInputValue("");
-		setSearchQuery("");
-		onSubmit("");
-	};
+	// Form submission handler
+	const handleSubmit = useCallback(
+		(e: React.FormEvent) => {
+			e.preventDefault();
+			onSubmit?.(inputValue);
+			// Force immediate query update instead of waiting for debounce
+			onQueryChange(inputValue);
+			// Dismiss mobile keyboard
+			(document.activeElement as HTMLElement)?.blur();
+		},
+		[inputValue, onQueryChange, onSubmit],
+	);
 
 	return (
-		<form onSubmit={handleSubmit} className="relative">
-			<div className="relative flex-1">
-				<div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground">
-					<Search className="h-4 w-4" />
-				</div>
-				<Input
-					type="search"
-					placeholder="Cari laporan, lokasi, atau masalah..."
-					className="pl-10 pr-12 h-11 rounded-xl border-muted/60 bg-background/80 focus-visible:ring-offset-0"
-					value={inputValue}
-					onChange={(e) => setInputValue(e.target.value)}
-				/>
-				{inputValue && (
-					<button
-						type="button"
-						className="absolute right-3.5 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full hover:bg-muted/70 inline-flex items-center justify-center transition-colors"
-						onClick={handleClear}
-					>
-						<X className="h-3.5 w-3.5" />
-					</button>
-				)}
-			</div>
+		<form onSubmit={handleSubmit} className="relative group flex-1">
+			<Input
+				ref={inputRef}
+				type="search"
+				placeholder={placeholder}
+				value={inputValue}
+				onChange={handleInputChange}
+				aria-label="Cari laporan"
+				startIcon={<Search className="h-4 w-4" />}
+			/>
 		</form>
 	);
 }

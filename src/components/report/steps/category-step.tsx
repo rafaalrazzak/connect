@@ -1,3 +1,4 @@
+import Icons, { Icon } from "@/components/icons";
 import { Card, CardContent } from "@/components/ui/card";
 import { categories } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
@@ -5,8 +6,8 @@ import type { Category } from "@/types/report";
 import React from "react";
 
 interface CategoryStepProps {
-	selectedCategory: Pick<Category, "id" | "name"> | null;
-	onSelect: (category: Pick<Category, "id" | "name"> | null) => void;
+	selectedCategory: Category | null;
+	onSelect: (category: Category | null) => void;
 }
 
 export function CategoryStep({
@@ -37,7 +38,10 @@ export function CategoryStep({
 					>
 						<CardContent className="p-4 flex flex-col items-center justify-center text-center">
 							<div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center mb-3">
-								<category.icon className="h-7 w-7 text-primary" />
+								<Icon
+									name={category.iconName}
+									className="h-7 w-7 text-primary"
+								/>
 							</div>
 							<span className="font-medium">{category.name}</span>
 						</CardContent>

@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import {
 	Command,
-	CommandEmpty,
 	CommandGroup,
 	CommandItem,
 	CommandList,
@@ -12,25 +11,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useDebounce } from "@/hooks/use-debounce";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-	AlertCircle,
-	Clock,
-	Loader2,
-	Locate,
-	MapPin,
-	Search,
-	X,
-} from "lucide-react";
+import { Clock, Loader2, Locate, MapPin, Search, X } from "lucide-react";
 import dynamic from "next/dynamic";
-import {
-	memo,
-	useCallback,
-	useEffect,
-	useMemo,
-	useReducer,
-	useRef,
-	useState,
-} from "react";
+import { memo, useCallback, useEffect, useReducer, useRef } from "react";
 import { toast } from "sonner";
 
 // Types

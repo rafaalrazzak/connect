@@ -2,7 +2,6 @@ import { faker } from "@faker-js/faker";
 
 import type { Category, Report, ReportStatus } from "@/types/report";
 
-// Simplified categories with essential properties
 export const categories: Category[] = [
 	{
 		id: "1",
