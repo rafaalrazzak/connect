@@ -12,7 +12,7 @@ const nextConfig = {
 	allowedDevOrigins: ["*.kita.blue", "localhost"],
 	experimental: {
 		serverActions: {
-			bodySizeLimit: "2mb",
+			bodySizeLimit: "5mb",
 		},
 	},
 };

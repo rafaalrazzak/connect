@@ -165,6 +165,11 @@ export async function uploadImages(files: File[]) {
  */
 export async function submitReport(params: unknown) {
 	try {
+
+		console.log({
+			params,
+			submitReportSchema,
+		})
 		// Validate input with zod
 		const validatedData = submitReportSchema.parse(params);
 
@@ -195,7 +200,7 @@ export async function submitReport(params: unknown) {
 
 		return {
 			success: true,
-			reportId: reports[Math.floor(Math.random() * reports.length)],
+			report: reports[Math.floor(Math.random() * reports.length)],
 		};
 	} catch (error) {
 		console.error("Report submission error:", error);
