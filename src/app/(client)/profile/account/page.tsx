@@ -105,10 +105,9 @@ const INITIAL_USER_DATA: UserProfile = {
   name: "John Doe",
   email: "john.doe@example.com",
   phone: "+62 812-3456-7890",
-  bio: "Passionate citizen who cares about community development and environmental issues.",
   location: "Jakarta, Indonesia",
-  avatar: "/placeholder-user.jpg",
-  coverImage: "/placeholder-cover.jpg",
+  avatar: "https://v0.dev/placeholder.svg",
+  coverImage: "https://v0.dev/placeholder.svg",
   dateOfBirth: "1990-05-15",
   gender: "male",
   publicProfile: true,
@@ -1067,20 +1066,6 @@ export default function AccountSettingsPage() {
                     />
                   </FormField>
                 </div>
-                <FormField label="Bio">
-                  <Textarea
-                    value={user.bio || ""}
-                    onChange={(e) =>
-                      setUser((prev) => ({
-                        ...prev,
-                        bio: e.target.value,
-                      }))
-                    }
-                    placeholder="Ceritakan tentang diri Anda"
-                    rows={3}
-                    className="resize-none"
-                  />
-                </FormField>
                 <Button
                   onClick={() => handleSave(user)}
                   disabled={isLoading}
