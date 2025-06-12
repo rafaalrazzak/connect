@@ -1,414 +1,474 @@
 "use client";
 
-import { PageHeader } from "@/components/page-header";
-import { ReportCard } from "@/components/report-card";
-import { EmptyState } from "@/components/reports/empty-state";
+import { memo, useState, useCallback } from "react";
+import Link from "next/link";
+import { motion } from "framer-motion";
+
+// UI Components
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
+
+// Feature Components
+import { PageHeader } from "@/components/page-header";
+import { ReportCard } from "@/components/report-card";
+import { EmptyState } from "@/components/reports/empty-state";
+
+// Data & Types
 import { reports } from "@/lib/mock-data";
 import { ReportStatusEnum } from "@/types/report";
+
+// Icons
 import {
-	AlertCircle,
-	Award,
-	BarChart,
-	Bell,
-	Camera,
-	CheckCircle,
-	ChevronRight,
-	Clock,
-	Edit,
-	HelpCircle,
-	LogOut,
-	MapPin,
-	Settings,
-	Shield,
-	Star,
+  AlertCircle,
+  Award,
+  BarChart3,
+  Camera,
+  CheckCircle,
+  ChevronRight,
+  Clock,
+  Edit,
+  HelpCircle,
+  LogOut,
+  Settings,
+  Star,
+  TrendingUp,
+  User,
 } from "lucide-react";
-import Link from "next/link";
-import { useState } from "react";
 
-export default function Profile() {
-	const [activeTab, setActiveTab] = useState("reports");
-	// Filter reports by status
-	const waitingReports = reports.filter(
-		(r) => r.status === ReportStatusEnum.Pending,
-	);
-	const processingReports = reports.filter(
-		(r) => r.status === ReportStatusEnum.InProgress,
-	);
-	const completedReports = reports.filter(
-		(r) => r.status === ReportStatusEnum.Completed,
-	);
+// Constants
+const USER_DATA = {
+  name: "John Doe",
+  email: "john.doe@example.com",
+  location: "Jakarta, Indonesia",
+  level: 3,
+  experience: 75,
+  badges: [
+    { label: "Pelapor Aktif", icon: Award, color: "amber" },
+    { label: "Level 3", icon: Star, color: "blue" },
+    { label: "Terverifikasi", icon: CheckCircle, color: "green" },
+  ],
+};
 
-	// User stats to display
-	const userStats = [
-		{ label: "Laporan", value: reports.length },
-		{ label: "Selesai", value: completedReports.length },
-		{ label: "Kontribusi", value: "75%" },
-	];
+const STATS_DATA = [
+  {
+    label: "Total Laporan",
+    value: reports.length,
+    icon: BarChart3,
+    color: "text-blue-600",
+    bgColor: "bg-blue-50",
+  },
+  {
+    label: "Diselesaikan",
+    value: reports.filter((r) => r.status === ReportStatusEnum.Completed)
+      .length,
+    icon: CheckCircle,
+    color: "text-green-600",
+    bgColor: "bg-green-50",
+  },
+  {
+    label: "Kontribusi",
+    value: "75%",
+    icon: TrendingUp,
+    color: "text-purple-600",
+    bgColor: "bg-purple-50",
+  },
+];
 
-	return (
-		<div className="container max-w-3xl mx-auto px-4 py-6 pb-24 md:pb-6 space-y-8">
-			{/* Profile Header */}
-			<PageHeader
-				title="Profil Saya"
-				description="Kelola akun, laporan, dan preferensi kamu"
-			/>
+const SETTINGS_ITEMS = [
+  {
+    title: "Pengaturan Akun",
+    description: "Email, password, dan informasi profil",
+    icon: User,
+    href: "/profile/account",
+  },
+  {
+    title: "Bantuan & Dukungan",
+    description: "Dapatkan bantuan untuk masalah yang kamu alami",
+    icon: HelpCircle,
+    href: "/help",
+  },
+];
 
-			{/* User Profile Card */}
-			<Card className="overflow-hidden border-muted/60 shadow-sm">
-				<div className="bg-gradient-to-r from-primary/20 via-primary/10 to-secondary/20 h-28 md:h-32 relative">
-					<Button
-						size="icon"
-						variant="secondary"
-						className="absolute right-4 top-4 rounded-full shadow-sm bg-background/80 backdrop-blur-sm"
-					>
-						<Camera className="h-4 w-4" />
-						<span className="sr-only">Change cover</span>
-					</Button>
-				</div>
-				<CardContent className="p-0">
-					<div className="px-6 pb-6 pt-0 -mt-12">
-						<div className="flex flex-col md:flex-row md:items-end gap-5">
-							<div className="relative group">
-								<Avatar className="h-24 w-24 border-4 border-background shadow-md">
-									<AvatarImage
-										src="/placeholder.svg?height=96&width=96"
-										alt="John Doe"
-									/>
-									<AvatarFallback className="text-2xl bg-gradient-to-br from-primary/10 to-secondary/10 text-primary">
-										JD
-									</AvatarFallback>
-								</Avatar>
-								<Button
-									size="icon"
-									variant="secondary"
-									className="absolute bottom-0 right-0 rounded-full h-8 w-8 shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
-								>
-									<Edit className="h-3.5 w-3.5" />
-									<span className="sr-only">Edit avatar</span>
-								</Button>
-							</div>
-							<div className="flex-1 space-y-1 mt-3 md:mt-0">
-								<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-									<div>
-										<h2 className="text-xl font-bold">John Doe</h2>
-										<p className="text-muted-foreground">
-											john.doe@example.com
-										</p>
-									</div>
-									<Button
-										variant="outline"
-										size="sm"
-										className="rounded-full inline-flex items-center gap-1.5 w-fit"
-									>
-										<Edit className="h-3.5 w-3.5" />
-										Edit Profil
-									</Button>
-								</div>
+// Animation variants
+const fadeIn = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.3 },
+};
 
-								<div className="flex flex-wrap items-center gap-2 mt-2">
-									<Badge variant="outlineInfo">
-										<Award className="h-3 w-3 mr-1.5" />
-										Pelapor Aktif
-									</Badge>
-									<Badge variant="outlineSuccess">
-										<Star className="h-3 w-3 mr-1.5" />
-										Level 3
-									</Badge>
-									<Badge variant="outlineWarning">
-										<CheckCircle className="h-3 w-3 mr-1.5" />
-										Terverifikasi
-									</Badge>
-								</div>
-							</div>
-						</div>
+const staggerContainer = {
+  animate: {
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
 
-						{/* User Stats */}
-						<div className="mt-6 grid grid-cols-3 gap-4 text-center">
-							{userStats.map((stat) => (
-								<div
-									key={stat.label}
-									className="p-3 rounded-xl bg-muted/40 flex flex-col"
-								>
-									<span className="text-lg font-semibold">{stat.value}</span>
-									<span className="text-xs text-muted-foreground">
-										{stat.label}
-									</span>
-								</div>
-							))}
-						</div>
+const slideUp = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+};
 
-						{/* Progress Level */}
-						<div className="mt-6 space-y-3">
-							<div className="flex justify-between text-sm">
-								<div className="flex items-center gap-1.5">
-									<BarChart className="h-4 w-4 text-primary" />
-									<span className="font-medium">Level Kontribusi</span>
-								</div>
-								<span className="text-primary font-medium">75/100 XP</span>
-							</div>
-							<Progress value={75} className="h-2.5 rounded-full bg-muted/70" />
-							<div className="flex items-center justify-between text-xs text-muted-foreground">
-								<span>Level 3</span>
-								<span>Level 4</span>
-							</div>
-							<p className="text-xs text-muted-foreground bg-muted/50 rounded-lg p-2 flex items-center gap-1.5">
-								<AlertCircle className="h-3.5 w-3.5 text-primary flex-shrink-0" />
-								<span>
-									Kirim 5 laporan lagi untuk mencapai Level 4 dan dapatkan badge
-									ekslusif
-								</span>
-							</p>
-						</div>
-					</div>
-				</CardContent>
-			</Card>
+// Profile Header Component
+const ProfileHeader = memo(() => (
+  <Card className="overflow-hidden border-0 shadow-sm">
+    {/* Cover Image */}
+    <div className="relative h-32 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent">
+      <div className="absolute inset-0 bg-grid-pattern opacity-5" />
+    </div>
 
-			{/* Main Tabs */}
-			<Tabs
-				defaultValue="reports"
-				value={activeTab}
-				onValueChange={setActiveTab}
-				className="space-y-6"
-			>
-				<TabsList className="grid grid-cols-2 w-full  p-1 bg-muted/60">
-					<TabsTrigger
-						value="reports"
-						className=" data-[state=active]:bg-background data-[state=active]:shadow-sm"
-					>
-						Laporan Saya
-					</TabsTrigger>
-					<TabsTrigger
-						value="settings"
-						className=" data-[state=active]:bg-background data-[state=active]:shadow-sm"
-					>
-						Pengaturan
-					</TabsTrigger>
-				</TabsList>
+    <CardContent className="p-6 -mt-16 relative">
+      <div className="flex flex-col sm:flex-row sm:items-end gap-6 mb-6">
+        {/* Avatar */}
+        <div className="relative group">
+          <Avatar className="h-24 w-24 border-4 border-background shadow-lg ring-2 ring-primary/10">
+            <AvatarImage src="/placeholder-user.jpg" alt={USER_DATA.name} />
+            <AvatarFallback className="text-2xl bg-gradient-to-br from-primary/20 to-secondary/20 text-primary font-semibold">
+              {USER_DATA.name.charAt(0)}
+            </AvatarFallback>
+          </Avatar>
+          <Button
+            size="sm"
+            variant="secondary"
+            className="absolute -bottom-1 -right-1 h-7 w-7 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-all duration-200"
+          >
+            <Edit className="h-3 w-3" />
+          </Button>
+        </div>
 
-				{/* Reports Tab */}
-				<TabsContent
-					value="reports"
-					className="space-y-6 mt-4 focus-visible:outline-none"
-				>
-					<Tabs defaultValue="all" className="w-full">
-						<div className="overflow-x-auto pb-2">
-							<TabsList className=" p-1 bg-muted/60 w-fit">
-								<TabsTrigger
-									value="all"
-									className=" data-[state=active]:bg-background data-[state=active]:shadow-sm"
-								>
-									Semua
-								</TabsTrigger>
-								<TabsTrigger
-									value="waiting"
-									className=" data-[state=active]:bg-background data-[state=active]:shadow-sm flex gap-1.5 items-center"
-								>
-									Menunggu
-									{waitingReports.length > 0 && (
-										<Badge className="h-5 w-5 p-0 flex items-center justify-center bg-amber-500 text-white  text-[10px]">
-											{waitingReports.length}
-										</Badge>
-									)}
-								</TabsTrigger>
-								<TabsTrigger
-									value="processing"
-									className=" data-[state=active]:bg-background data-[state=active]:shadow-sm flex gap-1.5 items-center"
-								>
-									Diproses
-									{processingReports.length > 0 && (
-										<Badge className="h-5 w-5 p-0 flex rounded-full items-center justify-center bg-blue-500 text-white  text-[10px]">
-											{processingReports.length}
-										</Badge>
-									)}
-								</TabsTrigger>
-								<TabsTrigger
-									value="completed"
-									className="data-[state=active]:bg-background data-[state=active]:shadow-sm flex gap-1.5 items-center"
-								>
-									Selesai
-									{completedReports.length > 0 && (
-										<Badge className="h-5 w-5 p-0 flex items-center justify-center bg-green-500 text-whiteounded-full text-[10px]">
-											{completedReports.length}
-										</Badge>
-									)}
-								</TabsTrigger>
-							</TabsList>
-						</div>
+        {/* User Info */}
+        <div className="flex-1 space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">
+                {USER_DATA.name}
+              </h1>
+              <p className="text-muted-foreground">{USER_DATA.email}</p>
+            </div>
+          </div>
 
-						<TabsContent
-							value="all"
-							className="mt-4 space-y-4 focus-visible:outline-none"
-						>
-							{reports.slice(0, 3).map((report) => (
-								<ReportCard key={report.id} report={report} />
-							))}
-						</TabsContent>
+          {/* Badges */}
+          <div className="flex flex-wrap gap-2">
+            {USER_DATA.badges.map((badge) => (
+              <Badge
+                key={badge.label}
+                variant="secondary"
+                className={`
+                  ${
+                    badge.color === "amber"
+                      ? "bg-amber-50 text-amber-700 border-amber-200"
+                      : ""
+                  }
+                  ${
+                    badge.color === "blue"
+                      ? "bg-blue-50 text-blue-700 border-blue-200"
+                      : ""
+                  }
+                  ${
+                    badge.color === "green"
+                      ? "bg-green-50 text-green-700 border-green-200"
+                      : ""
+                  }
+                `}
+              >
+                <badge.icon className="h-3 w-3 mr-1" />
+                {badge.label}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      </div>
 
-						<TabsContent
-							value="waiting"
-							className="mt-4 space-y-4 focus-visible:outline-none"
-						>
-							{waitingReports.length > 0 ? (
-								waitingReports.map((report) => (
-									<ReportCard key={report.id} report={report} />
-								))
-							) : (
-								<EmptyState
-									icon={AlertCircle}
-									message="Tidak ada laporan yang menunggu"
-									description="Semua laporan kamu sudah dalam proses atau selesai ditangani"
-								/>
-							)}
-						</TabsContent>
+      {/* Stats Grid */}
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        {STATS_DATA.map((stat, index) => (
+          <motion.div
+            key={stat.label}
+            variants={slideUp}
+            transition={{ delay: index * 0.1 }}
+            className={`text-center p-4 rounded-xl ${stat.bgColor} border border-border/50`}
+          >
+            <div className="flex items-center justify-center mb-2">
+              <stat.icon className={`h-5 w-5 ${stat.color}`} />
+            </div>
+            <div className="text-lg font-semibold">{stat.value}</div>
+            <div className="text-xs text-muted-foreground">{stat.label}</div>
+          </motion.div>
+        ))}
+      </div>
 
-						<TabsContent
-							value="processing"
-							className="mt-4 space-y-4 focus-visible:outline-none"
-						>
-							{processingReports.length > 0 ? (
-								processingReports.map((report) => (
-									<ReportCard key={report.id} report={report} />
-								))
-							) : (
-								<EmptyState
-									icon={Clock}
-									message="Tidak ada laporan yang sedang diproses"
-									description="Saat ini tidak ada laporan yang sedang ditangani"
-								/>
-							)}
-						</TabsContent>
+      {/* Progress Section */}
+      <div className="space-y-4 p-4 rounded-xl bg-primary/5 border border-primary/10">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <BarChart3 className="h-4 w-4 text-primary" />
+            <span className="font-medium text-sm">Progress Level</span>
+          </div>
+          <span className="text-sm font-medium text-primary">75/100 XP</span>
+        </div>
+        <Progress value={USER_DATA.experience} className="h-2" />
+        <div className="flex justify-between text-xs text-muted-foreground">
+          <span>Level {USER_DATA.level}</span>
+          <span>Level {USER_DATA.level + 1}</span>
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+));
 
-						<TabsContent
-							value="completed"
-							className="mt-4 space-y-4 focus-visible:outline-none"
-						>
-							{completedReports.length > 0 ? (
-								completedReports.map((report) => (
-									<ReportCard key={report.id} report={report} />
-								))
-							) : (
-								<EmptyState
-									icon={CheckCircle}
-									message="Tidak ada laporan yang selesai"
-									description="Laporan yang sudah diselesaikan akan muncul di sini"
-								/>
-							)}
-						</TabsContent>
-					</Tabs>
-				</TabsContent>
+ProfileHeader.displayName = "ProfileHeader";
 
-				{/* Settings Tab */}
-				<TabsContent
-					value="settings"
-					className="space-y-6 mt-4 focus-visible:outline-none"
-				>
-					<Card className="border-muted/60 shadow-sm">
-						<CardHeader className="pb-2">
-							<h3 className="text-sm font-medium text-muted-foreground">
-								Akun & Preferensi
-							</h3>
-						</CardHeader>
-						<CardContent className="p-0">
-							<Link href="/profile/account">
-								<div className="flex items-center justify-between p-4 hover:bg-muted/40 cursor-pointer transition-colors">
-									<div className="flex items-center">
-										<div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center mr-3">
-											<Settings className="h-4 w-4 text-primary" />
-										</div>
-										<div>
-											<span className="font-medium">Pengaturan Akun</span>
-											<p className="text-xs text-muted-foreground mt-0.5">
-												Email, password, dan informasi profil
-											</p>
-										</div>
-									</div>
-									<ChevronRight className="h-5 w-5 text-muted-foreground" />
-								</div>
-							</Link>
-							<Separator />
-							<Link href="/notifications/settings">
-								<div className="flex items-center justify-between p-4 hover:bg-muted/40 cursor-pointer transition-colors">
-									<div className="flex items-center">
-										<div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center mr-3">
-											<Bell className="h-4 w-4 text-primary" />
-										</div>
-										<div>
-											<span className="font-medium">Preferensi Notifikasi</span>
-											<p className="text-xs text-muted-foreground mt-0.5">
-												Atur jenis notifikasi yang ingin kamu terima
-											</p>
-										</div>
-									</div>
-									<ChevronRight className="h-5 w-5 text-muted-foreground" />
-								</div>
-							</Link>
-						</CardContent>
-					</Card>
+// Reports Tab Component
+const ReportsTab = memo(() => {
+  const [activeFilter, setActiveFilter] = useState("all");
 
-					<Card className="border-muted/60 shadow-sm">
-						<CardHeader className="pb-2">
-							<h3 className="text-sm font-medium text-muted-foreground">
-								Privasi & Bantuan
-							</h3>
-						</CardHeader>
-						<CardContent className="p-0">
-							<Link href="/profile/privacy">
-								<div className="flex items-center justify-between p-4 hover:bg-muted/40 cursor-pointer transition-colors">
-									<div className="flex items-center">
-										<div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center mr-3">
-											<Shield className="h-4 w-4 text-primary" />
-										</div>
-										<div>
-											<span className="font-medium">Privasi & Keamanan</span>
-											<p className="text-xs text-muted-foreground mt-0.5">
-												Kelola data dan keamanan akun kamu
-											</p>
-										</div>
-									</div>
-									<ChevronRight className="h-5 w-5 text-muted-foreground" />
-								</div>
-							</Link>
-							<Separator />
-							<Link href="/help">
-								<div className="flex items-center justify-between p-4 hover:bg-muted/40 cursor-pointer transition-colors">
-									<div className="flex items-center">
-										<div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center mr-3">
-											<HelpCircle className="h-4 w-4 text-primary" />
-										</div>
-										<div>
-											<span className="font-medium">Bantuan & Dukungan</span>
-											<p className="text-xs text-muted-foreground mt-0.5">
-												Dapatkan bantuan untuk masalah yang kamu alami
-											</p>
-										</div>
-									</div>
-									<ChevronRight className="h-5 w-5 text-muted-foreground" />
-								</div>
-							</Link>
-						</CardContent>
-					</Card>
+  const reportCategories = {
+    all: { reports, label: "Semua", count: reports.length },
+    pending: {
+      reports: reports.filter((r) => r.status === ReportStatusEnum.Pending),
+      label: "Menunggu",
+      count: reports.filter((r) => r.status === ReportStatusEnum.Pending)
+        .length,
+    },
+    progress: {
+      reports: reports.filter((r) => r.status === ReportStatusEnum.InProgress),
+      label: "Diproses",
+      count: reports.filter((r) => r.status === ReportStatusEnum.InProgress)
+        .length,
+    },
+    completed: {
+      reports: reports.filter((r) => r.status === ReportStatusEnum.Completed),
+      label: "Selesai",
+      count: reports.filter((r) => r.status === ReportStatusEnum.Completed)
+        .length,
+    },
+  };
 
-					<Button
-						variant="outline"
-						className="w-full border-destructive/30 hover:bg-destructive/5 text-destructive hover:text-destructive rounded-xl py-6"
-					>
-						<LogOut className="h-4 w-4 mr-2" />
-						Keluar dari Akun
-					</Button>
+  const StatusBadge = ({
+    count,
+    variant,
+  }: {
+    count: number;
+    variant: string;
+  }) => {
+    if (count === 0) return null;
+    const colors = {
+      all: "bg-primary",
+      pending: "bg-amber-500",
+      progress: "bg-blue-500",
+      completed: "bg-green-500",
+    };
+    return (
+      <Badge
+        className={`h-5 w-5 p-0 text-white text-xs ml-2 ${
+          colors[variant as keyof typeof colors]
+        }`}
+      >
+        {count}
+      </Badge>
+    );
+  };
 
-					<div className="text-center text-sm text-muted-foreground pt-4">
-						<p>Citizen Connect v1.0.0</p>
-						<p className="mt-1">© 2025 Citizen Connect. All rights reserved.</p>
-					</div>
-				</TabsContent>
-			</Tabs>
-		</div>
-	);
+  const EmptyStateComponent = ({ status }: { status: string }) => {
+    const states = {
+      pending: { icon: Clock, message: "Tidak ada laporan yang menunggu" },
+      progress: {
+        icon: AlertCircle,
+        message: "Tidak ada laporan yang diproses",
+      },
+      completed: {
+        icon: CheckCircle,
+        message: "Tidak ada laporan yang selesai",
+      },
+    };
+    const state = states[status as keyof typeof states];
+    return state ? (
+      <EmptyState icon={state.icon} message={state.message} />
+    ) : null;
+  };
+
+  return (
+    <div className="space-y-6">
+      <Tabs value={activeFilter} onValueChange={setActiveFilter}>
+        <TabsList className="w-fit">
+          {Object.entries(reportCategories).map(([key, { label, count }]) => (
+            <TabsTrigger
+              key={key}
+              value={key}
+              className="flex items-center gap-1"
+            >
+              {label}
+              <StatusBadge count={count} variant={key} />
+            </TabsTrigger>
+          ))}
+        </TabsList>
+
+        {Object.entries(reportCategories).map(
+          ([key, { reports: categoryReports }]) => (
+            <TabsContent key={key} value={key} className="space-y-4">
+              {categoryReports.length > 0 ? (
+                <motion.div
+                  variants={staggerContainer}
+                  animate="animate"
+                  className="space-y-4"
+                >
+                  {categoryReports.slice(0, 5).map((report) => (
+                    <motion.div key={report.id} variants={slideUp}>
+                      <ReportCard report={report} />
+                    </motion.div>
+                  ))}
+                  {categoryReports.length > 5 && (
+                    <div className="text-center pt-4">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="rounded-full"
+                      >
+                        Lihat Semua Laporan
+                        <ChevronRight className="h-4 w-4 ml-1" />
+                      </Button>
+                    </div>
+                  )}
+                </motion.div>
+              ) : (
+                <EmptyStateComponent status={key} />
+              )}
+            </TabsContent>
+          )
+        )}
+      </Tabs>
+    </div>
+  );
+});
+
+ReportsTab.displayName = "ReportsTab";
+
+// Settings Tab Component
+const SettingsTab = memo(() => {
+  const handleLogout = useCallback(() => {
+    console.log("Logout clicked");
+  }, []);
+
+  return (
+    <div className="space-y-6">
+      {/* Settings Sections */}
+      <div className="space-y-4">
+        {SETTINGS_ITEMS.map((item, index) => (
+          <motion.div
+            key={item.title}
+            variants={slideUp}
+            transition={{ delay: index * 0.1 }}
+          >
+            <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
+              <Link href={item.href}>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <item.icon className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium">{item.title}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {item.description}
+                        </p>
+                      </div>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                </CardContent>
+              </Link>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
+
+      <Separator />
+
+      {/* Logout Button */}
+      <motion.div variants={slideUp} transition={{ delay: 0.4 }}>
+        <Button
+          variant="outline"
+          className="w-full border-destructive/30 text-destructive hover:bg-destructive/5 hover:text-destructive"
+          onClick={handleLogout}
+        >
+          <LogOut className="h-4 w-4 mr-2" />
+          Keluar dari Akun
+        </Button>
+      </motion.div>
+
+      {/* Footer */}
+      <motion.div
+        variants={slideUp}
+        transition={{ delay: 0.5 }}
+        className="text-center text-sm text-muted-foreground space-y-1 pt-4"
+      >
+        <p className="font-medium">Citizen Connect v1.0.0</p>
+        <p>© 2025 Citizen Connect. All rights reserved.</p>
+      </motion.div>
+    </div>
+  );
+});
+
+SettingsTab.displayName = "SettingsTab";
+
+// Main Profile Component
+export default function ProfilePage() {
+  const [activeTab, setActiveTab] = useState("reports");
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted/20">
+      <div className="container max-w-4xl mx-auto px-4 py-6 space-y-8">
+        {/* Page Header */}
+        <motion.div {...fadeIn}>
+          <PageHeader
+            title="Profil Saya"
+            description="Kelola akun, laporan, dan preferensi kamu"
+          />
+        </motion.div>
+
+        {/* Profile Header */}
+        <motion.div {...fadeIn} transition={{ delay: 0.1 }}>
+          <ProfileHeader />
+        </motion.div>
+
+        {/* Main Tabs */}
+        <motion.div {...fadeIn} transition={{ delay: 0.2 }}>
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="space-y-6"
+          >
+            <TabsList className="w-full">
+              <TabsTrigger value="reports" className="w-full">
+                Laporan Saya
+              </TabsTrigger>
+              <TabsTrigger value="settings" className="w-full">
+                Pengaturan
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="reports" className="focus-visible:outline-none">
+              <ReportsTab />
+            </TabsContent>
+
+            <TabsContent
+              value="settings"
+              className="focus-visible:outline-none"
+            >
+              <motion.div variants={staggerContainer} animate="animate">
+                <SettingsTab />
+              </motion.div>
+            </TabsContent>
+          </Tabs>
+        </motion.div>
+      </div>
+    </div>
+  );
 }
