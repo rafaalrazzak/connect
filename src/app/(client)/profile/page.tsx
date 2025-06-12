@@ -266,7 +266,7 @@ const ReportsTab = memo(() => {
     };
     return (
       <Badge
-        className={`h-5 w-5 p-0 text-white text-xs ml-2 ${
+        className={`size-5  flex items-center justify-center p-0 text-white text-xs ${
           colors[variant as keyof typeof colors]
         }`}
       >
@@ -296,12 +296,12 @@ const ReportsTab = memo(() => {
   return (
     <div className="space-y-6">
       <Tabs value={activeFilter} onValueChange={setActiveFilter}>
-        <TabsList className="w-fit">
+        <TabsList className="size-full justify-normal overflow-x-auto">
           {Object.entries(reportCategories).map(([key, { label, count }]) => (
             <TabsTrigger
               key={key}
               value={key}
-              className="flex items-center gap-1"
+              className="flex items-center gap-1 w-full"
             >
               {label}
               <StatusBadge count={count} variant={key} />
@@ -370,7 +370,7 @@ const SettingsTab = memo(() => {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
-                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                         <item.icon className="h-5 w-5 text-primary" />
                       </div>
                       <div>
@@ -423,52 +423,41 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("reports");
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted/20">
-      <div className="container max-w-4xl mx-auto px-4 py-6 space-y-8">
-        {/* Page Header */}
-        <motion.div {...fadeIn}>
-          <PageHeader
-            title="Profil Saya"
-            description="Kelola akun, laporan, dan preferensi kamu"
-          />
-        </motion.div>
+    <>
+      <PageHeader title="Profil Saya" />
 
-        {/* Profile Header */}
-        <motion.div {...fadeIn} transition={{ delay: 0.1 }}>
-          <ProfileHeader />
-        </motion.div>
+      {/* Profile Header */}
+      <motion.div {...fadeIn} transition={{ delay: 0.1 }}>
+        <ProfileHeader />
+      </motion.div>
 
-        {/* Main Tabs */}
-        <motion.div {...fadeIn} transition={{ delay: 0.2 }}>
-          <Tabs
-            value={activeTab}
-            onValueChange={setActiveTab}
-            className="space-y-6"
-          >
-            <TabsList className="w-full">
-              <TabsTrigger value="reports" className="w-full">
-                Laporan Saya
-              </TabsTrigger>
-              <TabsTrigger value="settings" className="w-full">
-                Pengaturan
-              </TabsTrigger>
-            </TabsList>
+      {/* Main Tabs */}
+      <motion.div {...fadeIn} transition={{ delay: 0.2 }}>
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="space-y-6"
+        >
+          <TabsList className="w-full">
+            <TabsTrigger value="reports" className="w-full">
+              Laporan Saya
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="w-full">
+              Pengaturan
+            </TabsTrigger>
+          </TabsList>
 
-            <TabsContent value="reports" className="focus-visible:outline-none">
-              <ReportsTab />
-            </TabsContent>
+          <TabsContent value="reports" className="focus-visible:outline-none">
+            <ReportsTab />
+          </TabsContent>
 
-            <TabsContent
-              value="settings"
-              className="focus-visible:outline-none"
-            >
-              <motion.div variants={staggerContainer} animate="animate">
-                <SettingsTab />
-              </motion.div>
-            </TabsContent>
-          </Tabs>
-        </motion.div>
-      </div>
-    </div>
+          <TabsContent value="settings" className="focus-visible:outline-none">
+            <motion.div variants={staggerContainer} animate="animate">
+              <SettingsTab />
+            </motion.div>
+          </TabsContent>
+        </Tabs>
+      </motion.div>
+    </>
   );
 }

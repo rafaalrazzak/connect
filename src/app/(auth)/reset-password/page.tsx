@@ -129,7 +129,6 @@ export default function ResetPasswordPage() {
 								name="password"
 								type={showPassword ? "text" : "password"}
 								placeholder="••••••••"
-								className="pl-10 pr-10"
 								value={formData.password}
 								onChange={handleInputChange}
 								disabled={isLoading}
@@ -179,7 +178,6 @@ export default function ResetPasswordPage() {
 								name="confirmPassword"
 								type={showPassword ? "text" : "password"}
 								placeholder="••••••••"
-								className="pl-10"
 								value={formData.confirmPassword}
 								onChange={handleInputChange}
 								disabled={isLoading}

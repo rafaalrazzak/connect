@@ -258,7 +258,6 @@ export default function HelpPage() {
 										placeholder="Cari FAQ..."
 										value={searchQuery}
 										onChange={(e) => setSearchQuery(e.target.value)}
-										className="pl-10"
 									/>
 								</div>
 								

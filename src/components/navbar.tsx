@@ -388,7 +388,7 @@ export const BottomNavigation = memo(
 						"sticky bottom-0 left-0 right-0 z-50",
 						"border-t bg-background/90 backdrop-blur-md shadow-lg",
 						"pb-safe transition-all duration-200",
-						hideOnDesktop && "md:hidden",
+						// hideOnDesktop && "md:hidden",
 						className,
 					)}
 					{...props}

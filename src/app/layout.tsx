@@ -128,7 +128,7 @@ export default function RootLayout({
             </ReportDrawerProvider>
           </main>
         </ThemeProvider>
-        <Script id="maze-analytics" strategy="afterInteractive">
+        <Script id="maze" strategy="afterInteractive">
           {`
 (function (m, a, z, e) {
   var s, t;

@@ -21,7 +21,7 @@ export function SearchBar({
 		<div className="relative w-full">
 			<Input
 				placeholder="Cari lokasi..."
-				className="pl-10 pr-10 h-10 bg-background/95 backdrop-blur-sm shadow-md rounded-full border-muted"
+				className="h-10 bg-background/95 backdrop-blur-sm shadow-md rounded-full border-muted"
 				value={searchQuery}
 				onChange={(e) => setSearchQuery(e.target.value)}
 				onKeyDown={(e) => e.key === "Enter" && searchLocation()}

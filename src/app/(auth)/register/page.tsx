@@ -211,7 +211,6 @@ export default function RegisterPage() {
 								id="name"
 								name="name"
 								placeholder="John Doe"
-								className="pl-10 h-12"
 								value={formData.name}
 								onChange={handleInputChange}
 								disabled={isLoading}
@@ -229,7 +228,6 @@ export default function RegisterPage() {
 								name="email"
 								type="email"
 								placeholder="name@example.com"
-								className="pl-10 h-12"
 								value={formData.email}
 								onChange={handleInputChange}
 								disabled={isLoading}
@@ -247,7 +245,6 @@ export default function RegisterPage() {
 								name="password"
 								type={showPassword ? "text" : "password"}
 								placeholder="••••••••"
-								className="pl-10 pr-10 h-12"
 								value={formData.password}
 								onChange={handleInputChange}
 								disabled={isLoading}
@@ -298,7 +295,6 @@ export default function RegisterPage() {
 								name="confirmPassword"
 								type={showPassword ? "text" : "password"}
 								placeholder="••••••••"
-								className="pl-10 h-12"
 								value={formData.confirmPassword}
 								onChange={handleInputChange}
 								disabled={isLoading}

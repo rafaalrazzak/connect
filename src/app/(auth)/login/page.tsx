@@ -174,7 +174,6 @@ function LoginPageContent() {
 								name="email"
 								type="email"
 								placeholder="name@example.com"
-								className="pl-10 h-12"
 								value={formData.email}
 								onChange={handleInputChange}
 								disabled={isLoading}
@@ -201,7 +200,6 @@ function LoginPageContent() {
 								name="password"
 								type={showPassword ? "text" : "password"}
 								placeholder="••••••••"
-								className="pl-10 pr-10 h-12"
 								value={formData.password}
 								onChange={handleInputChange}
 								disabled={isLoading}
