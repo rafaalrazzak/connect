@@ -962,14 +962,7 @@ export default function AccountSettingsPage() {
           <PageHeader
             title="Pengaturan Akun"
             description="Kelola profil dan pengaturan keamanan akun Anda"
-          >
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/profile" className="flex items-center gap-2">
-                <ArrowLeft className="h-4 w-4" />
-                Kembali
-              </Link>
-            </Button>
-          </PageHeader>
+          />
         </div>
       </div>
 
