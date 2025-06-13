@@ -966,411 +966,415 @@ export default function AccountSettingsPage() {
           onCoverChange={handleCoverChange}
           uploading={uploading}
         />
-
-        {/* Main Tabs */}
-        <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="overflow-x-auto size-full justify-start">
-            <TabsTrigger value="profile" className="size-full flex gap-2">
-              <User className="h-4 w-4" />
-              <span>Profil</span>
-            </TabsTrigger>
-            <TabsTrigger value="security" className="size-full flex gap-2">
-              <Shield className="h-4 w-4" />
-              <span>Keamanan</span>
-            </TabsTrigger>
-            <TabsTrigger value="privacy" className="size-full flex gap-2">
-              <Lock className="h-4 w-4" />
-              <span>Privasi</span>
-            </TabsTrigger>
-            <TabsTrigger value="notifications" className="size-full flex gap-2">
-              <Bell className="h-4 w-4" />
-              <span>Notifikasi</span>
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Profile Tab */}
-          <TabsContent value="profile" className="space-y-6">
-            <SettingsSection
-              title="Informasi Dasar"
-              description="Informasi pribadi yang ditampilkan di profil Anda"
-              icon={User}
-            >
-              <div className="grid gap-6 sm:grid-cols-2">
-                <FormField label="Nama Lengkap" required>
-                  <Input
-                    value={user.name}
-                    onChange={(e) =>
-                      setUser((prev) => ({
-                        ...prev,
-                        name: e.target.value,
-                      }))
-                    }
-                    placeholder="Masukkan nama lengkap"
-                  />
-                </FormField>
-                <FormField label="Email" required>
-                  <Input
-                    type="email"
-                    value={user.email}
-                    onChange={(e) =>
-                      setUser((prev) => ({
-                        ...prev,
-                        email: e.target.value,
-                      }))
-                    }
-                    placeholder="Masukkan email"
-                  />
-                </FormField>
-                <FormField label="Nomor Telepon">
-                  <Input
-                    type="tel"
-                    value={user.phone || ""}
-                    onChange={(e) =>
-                      setUser((prev) => ({
-                        ...prev,
-                        phone: e.target.value,
-                      }))
-                    }
-                    placeholder="Masukkan nomor telepon"
-                  />
-                </FormField>
-                <FormField label="Lokasi">
-                  <Input
-                    value={user.location || ""}
-                    onChange={(e) =>
-                      setUser((prev) => ({
-                        ...prev,
-                        location: e.target.value,
-                      }))
-                    }
-                    placeholder="Masukkan lokasi"
-                  />
-                </FormField>
-              </div>
-              <Button
-                onClick={() => handleSave(user)}
-                disabled={isLoading}
-                className="w-full sm:w-auto"
+        <div className="px-6">
+          {/* Main Tabs */}
+          <Tabs defaultValue="profile" className="space-y-6">
+            <TabsList className="overflow-x-auto size-full justify-start">
+              <TabsTrigger value="profile" className="size-full flex gap-2">
+                <User className="h-4 w-4" />
+                <span>Profil</span>
+              </TabsTrigger>
+              <TabsTrigger value="security" className="size-full flex gap-2">
+                <Shield className="h-4 w-4" />
+                <span>Keamanan</span>
+              </TabsTrigger>
+              <TabsTrigger value="privacy" className="size-full flex gap-2">
+                <Lock className="h-4 w-4" />
+                <span>Privasi</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="notifications"
+                className="size-full flex gap-2"
               >
-                {isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : (
-                  <Save className="h-4 w-4 mr-2" />
-                )}
-                Simpan Perubahan
-              </Button>
-            </SettingsSection>
-          </TabsContent>
+                <Bell className="h-4 w-4" />
+                <span>Notifikasi</span>
+              </TabsTrigger>
+            </TabsList>
 
-          {/* Security Tab */}
-          <TabsContent value="security" className="space-y-6">
-            <SettingsSection
-              title="Ubah Password"
-              description="Perbarui password untuk menjaga keamanan akun"
-              icon={Key}
-            >
-              <div className="space-y-6">
-                <FormField label="Password Saat Ini" required>
-                  <div className="relative">
+            {/* Profile Tab */}
+            <TabsContent value="profile" className="space-y-6">
+              <SettingsSection
+                title="Informasi Dasar"
+                description="Informasi pribadi yang ditampilkan di profil Anda"
+                icon={User}
+              >
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <FormField label="Nama Lengkap" required>
                     <Input
-                      type={showPasswords.current ? "text" : "password"}
-                      value={passwordForm.currentPassword}
+                      value={user.name}
                       onChange={(e) =>
-                        setPasswordForm((prev) => ({
+                        setUser((prev) => ({
                           ...prev,
-                          currentPassword: e.target.value,
+                          name: e.target.value,
                         }))
                       }
-                      placeholder="Masukkan password saat ini"
+                      placeholder="Masukkan nama lengkap"
                     />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-2 top-1/2 -translate-y-1/2 h-auto p-1"
-                      onClick={() => togglePasswordVisibility("current")}
-                      aria-label="Toggle password visibility"
-                    >
-                      {showPasswords.current ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                </FormField>
+                  </FormField>
+                  <FormField label="Email" required>
+                    <Input
+                      type="email"
+                      value={user.email}
+                      onChange={(e) =>
+                        setUser((prev) => ({
+                          ...prev,
+                          email: e.target.value,
+                        }))
+                      }
+                      placeholder="Masukkan email"
+                    />
+                  </FormField>
+                  <FormField label="Nomor Telepon">
+                    <Input
+                      type="tel"
+                      value={user.phone || ""}
+                      onChange={(e) =>
+                        setUser((prev) => ({
+                          ...prev,
+                          phone: e.target.value,
+                        }))
+                      }
+                      placeholder="Masukkan nomor telepon"
+                    />
+                  </FormField>
+                  <FormField label="Lokasi">
+                    <Input
+                      value={user.location || ""}
+                      onChange={(e) =>
+                        setUser((prev) => ({
+                          ...prev,
+                          location: e.target.value,
+                        }))
+                      }
+                      placeholder="Masukkan lokasi"
+                    />
+                  </FormField>
+                </div>
+                <Button
+                  onClick={() => handleSave(user)}
+                  disabled={isLoading}
+                  className="w-full sm:w-auto"
+                >
+                  {isLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <Save className="h-4 w-4 mr-2" />
+                  )}
+                  Simpan Perubahan
+                </Button>
+              </SettingsSection>
+            </TabsContent>
 
-                <FormField label="Password Baru" required>
-                  <div className="space-y-4">
+            {/* Security Tab */}
+            <TabsContent value="security" className="space-y-6">
+              <SettingsSection
+                title="Ubah Password"
+                description="Perbarui password untuk menjaga keamanan akun"
+                icon={Key}
+              >
+                <div className="space-y-6">
+                  <FormField label="Password Saat Ini" required>
                     <div className="relative">
                       <Input
-                        type={showPasswords.new ? "text" : "password"}
-                        value={passwordForm.newPassword}
+                        type={showPasswords.current ? "text" : "password"}
+                        value={passwordForm.currentPassword}
                         onChange={(e) =>
                           setPasswordForm((prev) => ({
                             ...prev,
-                            newPassword: e.target.value,
+                            currentPassword: e.target.value,
                           }))
                         }
-                        placeholder="Masukkan password baru"
+                        placeholder="Masukkan password saat ini"
                       />
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
                         className="absolute right-2 top-1/2 -translate-y-1/2 h-auto p-1"
-                        onClick={() => togglePasswordVisibility("new")}
+                        onClick={() => togglePasswordVisibility("current")}
                         aria-label="Toggle password visibility"
                       >
-                        {showPasswords.new ? (
+                        {showPasswords.current ? (
                           <EyeOff className="h-4 w-4" />
                         ) : (
                           <Eye className="h-4 w-4" />
                         )}
                       </Button>
                     </div>
-                    <PasswordStrengthIndicator
-                      password={passwordForm.newPassword}
-                    />
-                  </div>
-                </FormField>
+                  </FormField>
 
-                <FormField label="Konfirmasi Password Baru" required>
-                  <div className="relative">
-                    <Input
-                      type={showPasswords.confirm ? "text" : "password"}
-                      value={passwordForm.confirmPassword}
-                      onChange={(e) =>
-                        setPasswordForm((prev) => ({
-                          ...prev,
-                          confirmPassword: e.target.value,
-                        }))
-                      }
-                      placeholder="Konfirmasi password baru"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-2 top-1/2 -translate-y-1/2 h-auto p-1"
-                      onClick={() => togglePasswordVisibility("confirm")}
-                      aria-label="Toggle password visibility"
-                    >
-                      {" "}
-                      {showPasswords.confirm ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                </FormField>
-
-                <Button
-                  onClick={handlePasswordChange}
-                  disabled={isLoading || !isFormValid}
-                  className="w-full sm:w-auto"
-                >
-                  {isLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  ) : (
-                    <Key className="h-4 w-4 mr-2" />
-                  )}
-                  Ubah Password
-                </Button>
-              </div>
-            </SettingsSection>
-
-            <SettingsSection
-              title="Autentikasi Dua Faktor"
-              description="Tambahan lapisan keamanan untuk akun Anda"
-              icon={Shield}
-            >
-              <div className="flex items-center justify-between p-6 rounded-xl border bg-muted/20 gap-4">
-                <div className="flex-1">
-                  <h4 className="font-medium">Status 2FA</h4>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {user.twoFactorEnabled
-                      ? "Aktif - Akun Anda terlindungi"
-                      : "Nonaktif - Disarankan untuk mengaktifkan"}
-                  </p>
-                </div>
-                <Dialog open={twoFactorOpen} onOpenChange={setTwoFactorOpen}>
-                  <DialogTrigger asChild>
-                    <Button
-                      variant={user.twoFactorEnabled ? "outline" : "default"}
-                    >
-                      {user.twoFactorEnabled ? "Kelola" : "Aktifkan"}
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Autentikasi Dua Faktor</DialogTitle>
-                      <DialogDescription>
-                        {user.twoFactorEnabled
-                          ? "Kelola pengaturan autentikasi dua faktor Anda"
-                          : "Scan QR code dengan aplikasi authenticator"}
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="flex justify-center p-6">
-                      <div className="w-48 h-48 bg-muted rounded-xl flex items-center justify-center">
-                        <span className="text-muted-foreground">QR Code</span>
+                  <FormField label="Password Baru" required>
+                    <div className="space-y-4">
+                      <div className="relative">
+                        <Input
+                          type={showPasswords.new ? "text" : "password"}
+                          value={passwordForm.newPassword}
+                          onChange={(e) =>
+                            setPasswordForm((prev) => ({
+                              ...prev,
+                              newPassword: e.target.value,
+                            }))
+                          }
+                          placeholder="Masukkan password baru"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-2 top-1/2 -translate-y-1/2 h-auto p-1"
+                          onClick={() => togglePasswordVisibility("new")}
+                          aria-label="Toggle password visibility"
+                        >
+                          {showPasswords.new ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </Button>
                       </div>
+                      <PasswordStrengthIndicator
+                        password={passwordForm.newPassword}
+                      />
                     </div>
-                    <DialogFooter>
-                      <Button
-                        variant="outline"
-                        onClick={() => setTwoFactorOpen(false)}
-                      >
-                        Batal
-                      </Button>
-                      <Button onClick={handleTwoFactorToggle}>
-                        {user.twoFactorEnabled ? "Nonaktifkan" : "Aktifkan"}
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>{" "}
-                </Dialog>
-              </div>
-            </SettingsSection>
+                  </FormField>
 
-            {/* Delete Account Section */}
-            <SettingsSection
-              title="Zona Bahaya"
-              description="Tindakan permanen yang tidak dapat dibatalkan"
-              icon={AlertTriangle}
-            >
-              <div className="p-6 rounded-xl border border-red-200 bg-red-50/50">
-                <div className="flex flex-col items-start gap-4">
-                  <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-                    <Trash2 className="h-5 w-5 text-red-600" />
-                  </div>
+                  <FormField label="Konfirmasi Password Baru" required>
+                    <div className="relative">
+                      <Input
+                        type={showPasswords.confirm ? "text" : "password"}
+                        value={passwordForm.confirmPassword}
+                        onChange={(e) =>
+                          setPasswordForm((prev) => ({
+                            ...prev,
+                            confirmPassword: e.target.value,
+                          }))
+                        }
+                        placeholder="Konfirmasi password baru"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 h-auto p-1"
+                        onClick={() => togglePasswordVisibility("confirm")}
+                        aria-label="Toggle password visibility"
+                      >
+                        {" "}
+                        {showPasswords.confirm ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </FormField>
+
+                  <Button
+                    onClick={handlePasswordChange}
+                    disabled={isLoading || !isFormValid}
+                    className="w-full sm:w-auto"
+                  >
+                    {isLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <Key className="h-4 w-4 mr-2" />
+                    )}
+                    Ubah Password
+                  </Button>
+                </div>
+              </SettingsSection>
+
+              <SettingsSection
+                title="Autentikasi Dua Faktor"
+                description="Tambahan lapisan keamanan untuk akun Anda"
+                icon={Shield}
+              >
+                <div className="flex items-center justify-between p-6 rounded-xl border bg-muted/20 gap-4">
                   <div className="flex-1">
-                    <h4 className="font-medium text-red-900 mb-2">
-                      Hapus Akun Permanen
-                    </h4>
-                    <p className="text-sm text-red-700 mb-4">
-                      Menghapus akun akan menghilangkan semua data Anda secara
-                      permanen, termasuk profil, laporan, dan riwayat aktivitas.
-                      Tindakan ini tidak dapat dibatalkan.
+                    <h4 className="font-medium">Status 2FA</h4>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {user.twoFactorEnabled
+                        ? "Aktif - Akun Anda terlindungi"
+                        : "Nonaktif - Disarankan untuk mengaktifkan"}
                     </p>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => setDeleteDialogOpen(true)}
-                      className="w-full sm:w-auto"
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Hapus Akun
-                    </Button>
+                  </div>
+                  <Dialog open={twoFactorOpen} onOpenChange={setTwoFactorOpen}>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant={user.twoFactorEnabled ? "outline" : "default"}
+                      >
+                        {user.twoFactorEnabled ? "Kelola" : "Aktifkan"}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Autentikasi Dua Faktor</DialogTitle>
+                        <DialogDescription>
+                          {user.twoFactorEnabled
+                            ? "Kelola pengaturan autentikasi dua faktor Anda"
+                            : "Scan QR code dengan aplikasi authenticator"}
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="flex justify-center p-6">
+                        <div className="w-48 h-48 bg-muted rounded-xl flex items-center justify-center">
+                          <span className="text-muted-foreground">QR Code</span>
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button
+                          variant="outline"
+                          onClick={() => setTwoFactorOpen(false)}
+                        >
+                          Batal
+                        </Button>
+                        <Button onClick={handleTwoFactorToggle}>
+                          {user.twoFactorEnabled ? "Nonaktifkan" : "Aktifkan"}
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>{" "}
+                  </Dialog>
+                </div>
+              </SettingsSection>
+
+              {/* Delete Account Section */}
+              <SettingsSection
+                title="Zona Bahaya"
+                description="Tindakan permanen yang tidak dapat dibatalkan"
+                icon={AlertTriangle}
+              >
+                <div className="p-6 rounded-xl border border-red-200 bg-red-50/50">
+                  <div className="flex flex-col items-start gap-4">
+                    <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                      <Trash2 className="h-5 w-5 text-red-600" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-medium text-red-900 mb-2">
+                        Hapus Akun Permanen
+                      </h4>
+                      <p className="text-sm text-red-700 mb-4">
+                        Menghapus akun akan menghilangkan semua data Anda secara
+                        permanen, termasuk profil, laporan, dan riwayat
+                        aktivitas. Tindakan ini tidak dapat dibatalkan.
+                      </p>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => setDeleteDialogOpen(true)}
+                        className="w-full sm:w-auto"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Hapus Akun
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </SettingsSection>
-          </TabsContent>
+              </SettingsSection>
+            </TabsContent>
 
-          {/* Privacy Tab */}
-          <TabsContent value="privacy" className="space-y-6">
-            <SettingsSection
-              title="Visibilitas Profil"
-              description="Kontrol informasi yang dapat dilihat orang lain"
-              icon={Lock}
-            >
-              <div className="space-y-4">
-                <PrivacyToggle
-                  title="Profil Publik"
-                  description="Profil dapat dilihat oleh semua pengguna"
-                  checked={user.publicProfile}
-                  onCheckedChange={(checked) => {
-                    setUser((prev) => ({ ...prev, publicProfile: checked }));
-                    handleSave({ publicProfile: checked });
-                  }}
-                />
-                <PrivacyToggle
-                  title="Tampilkan Email"
-                  description="Alamat email ditampilkan di profil publik"
-                  checked={user.showEmail}
-                  onCheckedChange={(checked) => {
-                    setUser((prev) => ({ ...prev, showEmail: checked }));
-                    handleSave({ showEmail: checked });
-                  }}
-                />
-                <PrivacyToggle
-                  title="Tampilkan Nomor Telepon"
-                  description="Nomor telepon ditampilkan di profil publik"
-                  checked={user.showPhone}
-                  onCheckedChange={(checked) => {
-                    setUser((prev) => ({ ...prev, showPhone: checked }));
-                    handleSave({ showPhone: checked });
-                  }}
-                />
-              </div>
-            </SettingsSection>
-          </TabsContent>
+            {/* Privacy Tab */}
+            <TabsContent value="privacy" className="space-y-6">
+              <SettingsSection
+                title="Visibilitas Profil"
+                description="Kontrol informasi yang dapat dilihat orang lain"
+                icon={Lock}
+              >
+                <div className="space-y-4">
+                  <PrivacyToggle
+                    title="Profil Publik"
+                    description="Profil dapat dilihat oleh semua pengguna"
+                    checked={user.publicProfile}
+                    onCheckedChange={(checked) => {
+                      setUser((prev) => ({ ...prev, publicProfile: checked }));
+                      handleSave({ publicProfile: checked });
+                    }}
+                  />
+                  <PrivacyToggle
+                    title="Tampilkan Email"
+                    description="Alamat email ditampilkan di profil publik"
+                    checked={user.showEmail}
+                    onCheckedChange={(checked) => {
+                      setUser((prev) => ({ ...prev, showEmail: checked }));
+                      handleSave({ showEmail: checked });
+                    }}
+                  />
+                  <PrivacyToggle
+                    title="Tampilkan Nomor Telepon"
+                    description="Nomor telepon ditampilkan di profil publik"
+                    checked={user.showPhone}
+                    onCheckedChange={(checked) => {
+                      setUser((prev) => ({ ...prev, showPhone: checked }));
+                      handleSave({ showPhone: checked });
+                    }}
+                  />
+                </div>
+              </SettingsSection>
+            </TabsContent>
 
-          {/* Notifications Tab */}
-          <TabsContent value="notifications" className="space-y-6">
-            <SettingsSection
-              title="Preferensi Notifikasi"
-              description="Atur bagaimana Anda ingin menerima notifikasi"
-              icon={Bell}
-            >
-              <div className="space-y-4">
-                <PrivacyToggle
-                  title="Notifikasi Email"
-                  description="Terima notifikasi melalui email"
-                  checked={true}
-                  onCheckedChange={(checked) =>
-                    console.log("Email notifications:", checked)
-                  }
-                />
-                <PrivacyToggle
-                  title="Notifikasi Push"
-                  description="Terima notifikasi push di perangkat"
-                  checked={true}
-                  onCheckedChange={(checked) =>
-                    console.log("Push notifications:", checked)
-                  }
-                />
-                <PrivacyToggle
-                  title="Update Laporan"
-                  description="Notifikasi ketika laporan Anda diperbarui"
-                  checked={true}
-                  onCheckedChange={(checked) =>
-                    console.log("Report updates:", checked)
-                  }
-                />
-                <PrivacyToggle
-                  title="Komentar Baru"
-                  description="Notifikasi ketika ada komentar pada laporan Anda"
-                  checked={true}
-                  onCheckedChange={(checked) =>
-                    console.log("New comments:", checked)
-                  }
-                />
-              </div>
-            </SettingsSection>
-          </TabsContent>
-        </Tabs>
+            {/* Notifications Tab */}
+            <TabsContent value="notifications" className="space-y-6">
+              <SettingsSection
+                title="Preferensi Notifikasi"
+                description="Atur bagaimana Anda ingin menerima notifikasi"
+                icon={Bell}
+              >
+                <div className="space-y-4">
+                  <PrivacyToggle
+                    title="Notifikasi Email"
+                    description="Terima notifikasi melalui email"
+                    checked={true}
+                    onCheckedChange={(checked) =>
+                      console.log("Email notifications:", checked)
+                    }
+                  />
+                  <PrivacyToggle
+                    title="Notifikasi Push"
+                    description="Terima notifikasi push di perangkat"
+                    checked={true}
+                    onCheckedChange={(checked) =>
+                      console.log("Push notifications:", checked)
+                    }
+                  />
+                  <PrivacyToggle
+                    title="Update Laporan"
+                    description="Notifikasi ketika laporan Anda diperbarui"
+                    checked={true}
+                    onCheckedChange={(checked) =>
+                      console.log("Report updates:", checked)
+                    }
+                  />
+                  <PrivacyToggle
+                    title="Komentar Baru"
+                    description="Notifikasi ketika ada komentar pada laporan Anda"
+                    checked={true}
+                    onCheckedChange={(checked) =>
+                      console.log("New comments:", checked)
+                    }
+                  />
+                </div>
+              </SettingsSection>
+            </TabsContent>
+          </Tabs>
 
-        {/* Image Preview Dialog */}
-        <ImagePreviewDialog
-          open={!!imagePreview}
-          onOpenChange={() => setImagePreview(null)}
-          imageUrl={imagePreview?.url || null}
-          title={imagePreview?.type === "avatar" ? "Avatar" : "Cover Image"}
-          onConfirm={() => setImagePreview(null)}
-          onCancel={() => setImagePreview(null)}
-        />
+          {/* Image Preview Dialog */}
+          <ImagePreviewDialog
+            open={!!imagePreview}
+            onOpenChange={() => setImagePreview(null)}
+            imageUrl={imagePreview?.url || null}
+            title={imagePreview?.type === "avatar" ? "Avatar" : "Cover Image"}
+            onConfirm={() => setImagePreview(null)}
+            onCancel={() => setImagePreview(null)}
+          />
 
-        {/* Delete Account Dialog */}
-        <DeleteAccountDialog
-          open={deleteDialogOpen}
-          onOpenChange={setDeleteDialogOpen}
-          onConfirm={() => {
-            setDeleteDialogOpen(false);
-            // Handle account deletion logic here
-          }}
-        />
+          {/* Delete Account Dialog */}
+          <DeleteAccountDialog
+            open={deleteDialogOpen}
+            onOpenChange={setDeleteDialogOpen}
+            onConfirm={() => {
+              setDeleteDialogOpen(false);
+              // Handle account deletion logic here
+            }}
+          />
+        </div>
       </motion.div>
     </>
   );
