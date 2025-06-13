@@ -5,7 +5,7 @@ import { SectionHeader } from "@/components/ui/section-header";
 export function CategoriesSection() {
   return (
     <Card>
-      <SectionHeader title="Kategori Laporan" />
+      <SectionHeader title="Laporkan Berdasarkan Kategori" />
       <CardContent>
         <CategoryCarousel />
       </CardContent>
