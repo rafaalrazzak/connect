@@ -39,7 +39,7 @@ export function ReportHeader({ report }: { report: Report }) {
 	}, [report.title]);
 
 	return (
-		<div className="sticky top-0 z-30 bg-background/80 backdrop-blur-md px-4 -mx-4 py-3 border-b shadow-sm">
+		<div className="sticky top-0 z-30 bg-background/80 backdrop-blur-md px-4 -mx-4 py-3 border-b shadow-sm mb-4">
 			<div className="flex items-center justify-between max-w-screen-md mx-auto">
 				<div className="flex items-center gap-3 min-w-0">
 					<Link href="/reports">

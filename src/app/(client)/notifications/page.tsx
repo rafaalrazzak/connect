@@ -175,7 +175,7 @@ export default function Notifications() {
           const filteredNotifications = getFilteredNotifications(tab);
 
           return (
-            <TabsContent key={tab} value={tab} className="mt-6 pb-6">
+            <TabsContent key={tab} value={tab} className="mt-6">
               {filteredNotifications.length > 0 ? (
                 <div className="space-y-6">
                   <NotificationGroup
