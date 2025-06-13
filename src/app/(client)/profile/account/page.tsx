@@ -102,8 +102,8 @@ interface FileValidationResult {
 // ==================== CONSTANTS ====================
 const INITIAL_USER_DATA: UserProfile = {
   id: "usr_123",
-  name: "John Doe",
-  email: "john.doe@example.com",
+  name: "Rafa Al Razzak",
+  email: "rafaar@kita.blue",
   phone: "+62 812-3456-7890",
   location: "Jakarta, Indonesia",
   avatar: "https://v0.dev/placeholder.svg",

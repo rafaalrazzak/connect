@@ -43,8 +43,8 @@ import {
 
 // Constants
 const USER_DATA = {
-  name: "John Doe",
-  email: "john.doe@example.com",
+  name: "Rafa Al Razzak",
+  email: "rafaar@kita.blue",
   location: "Jakarta, Indonesia",
   level: 3,
   experience: 75,
