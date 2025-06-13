@@ -26,7 +26,7 @@ function HomeContent() {
     <>
       <AppHeader />
 
-      <main className="space-y-6 mx-auto px-4">
+      <main className="space-y-6 mx-auto p-4">
         <ActionCards />
         <CategoriesSection />
         <ReportsTabs />

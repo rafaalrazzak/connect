@@ -430,7 +430,7 @@ export function NavigationLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       {/* <Navbar /> */}
-      <main className="min-h-[calc(100vh-4rem)] pb-12">{children}</main>
+      <main className="min-h-[calc(100vh-4rem)] pb-12 max-w-lg mx-auto">{children}</main>
       <BottomNavigation />
     </>
   );
