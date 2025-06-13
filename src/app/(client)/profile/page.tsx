@@ -432,7 +432,7 @@ export default function ProfilePage() {
       </motion.div>
 
       {/* Main Tabs */}
-      <motion.div {...fadeIn} transition={{ delay: 0.2 }}>
+      <motion.div {...fadeIn} transition={{ delay: 0.2 }} className="px-6 pb-6">
         <Tabs
           value={activeTab}
           onValueChange={setActiveTab}

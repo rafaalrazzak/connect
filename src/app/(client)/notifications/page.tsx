@@ -149,9 +149,9 @@ export default function Notifications() {
         defaultValue="all"
         value={activeTab}
         onValueChange={setActiveTab}
-        className="w-full px-4 gap-4"
+        className="size-full px-4 gap-4"
       >
-        <TabsList className="flex w-full">
+        <TabsList className="flex size-full overflow-auto justify-start">
           <TabsTrigger value="all" className="w-full">
             Semua
           </TabsTrigger>
