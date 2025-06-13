@@ -966,7 +966,7 @@ export default function AccountSettingsPage() {
           onCoverChange={handleCoverChange}
           uploading={uploading}
         />
-        <div className="px-6">
+        <div className="px-4">
           {/* Main Tabs */}
           <Tabs defaultValue="profile" className="space-y-6">
             <TabsList className="overflow-x-auto size-full justify-start">
